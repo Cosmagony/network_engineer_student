@@ -10,7 +10,11 @@
 
 #### 1.2 Проверка настроек коммутатора по умолчанию 
 
-a. Введём команду *enable*, чтобы войти в привилегированный режим EXEC. Далее вводим команду *show running-config*. На коммутатор находиться пустой файл конфигурации по умолчанию. Оставляем. 
+a. Введём команду *enable*, чтобы войти в привилегированный режим EXEC. Далее вводим команду 
+
+       *show running-config*
+
+ На коммутатор находиться пустой файл конфигурации по умолчанию. Оставляем. 
 
 b. Изучите текущий файл running configuration.
 
@@ -26,13 +30,17 @@ b. Изучите текущий файл running configuration.
 
 c. Изучите файл загрузочной конфигурации (startup configuration), который содержится в энергонезависимом ОЗУ (NVRAM).
 
-Вводим команду *show startup-config*
+Вводим команду 
+
+       *show startup-config*
 
 -	startup-config is not present
 
 d. Изучите характеристики SVI для VLAN 1.
 
-Вводим команду *show vlan* и *show vlan*
+Вводим команду 
+
+       *show vlan* и *show vlan brief*
 
 Назначен ли IP-адрес сети VLAN 1?
 
@@ -46,61 +54,65 @@ e.	Изучите IP-свойства интерфейса SVI сети VLAN 1.
 
 Какие выходные данные вы видите?
 
-  SW0#show ip int br
-  Interface              IP-Address      OK? Method Status                Protocol 
-  FastEthernet0/1        unassigned      YES manual down                  down 
-  FastEthernet0/2        unassigned      YES manual down                  down 
-  FastEthernet0/3        unassigned      YES manual down                  down 
-  FastEthernet0/4        unassigned      YES manual down                  down 
-  FastEthernet0/5        unassigned      YES manual down                  down 
-  FastEthernet0/6        unassigned      YES manual doun                  down 
-  FastEthernet0/7        unassigned      YES manual down                  down 
-  FastEthernet0/8        unassigned      YES manual down                  down 
-  FastEthernet0/9        unassigned      YES manual down                  down 
-  FastEthernet0/10       unassigned      YES manual down                  down 
-  FastEthernet0/11       unassigned      YES manual down                  down 
-  FastEthernet0/12       unassigned      YES manual down                  down 
-  FastEthernet0/13       unassigned      YES manual down                  down 
-  FastEthernet0/14       unassigned      YES manual down                  down 
-  FastEthernet0/15       unassigned      YES manual down                  down 
-  FastEthernet0/16       unassigned      YES manual down                  down 
-  FastEthernet0/17       unassigned      YES manual down                  down 
-  FastEthernet0/18       unassigned      YES manual down                  down 
-  FastEthernet0/19       unassigned      YES manual down                  down 
-  FastEthernet0/20       unassigned      YES manual down                  down 
-  FastEthernet0/21       unassigned      YES manual down                  down 
+     *show ip int br*
+     
+     Interface              IP-Address      OK? Method Status                Protocol 
+     FastEthernet0/1        unassigned      YES manual down                  down 
+     FastEthernet0/2        unassigned      YES manual down                  down 
+     FastEthernet0/3        unassigned      YES manual down                  down 
+     FastEthernet0/4        unassigned      YES manual down                  down 
+     FastEthernet0/5        unassigned      YES manual down                  down 
+     FastEthernet0/6        unassigned      YES manual doun                  down 
+     FastEthernet0/7        unassigned      YES manual down                  down 
+     FastEthernet0/8        unassigned      YES manual down                  down 
+     FastEthernet0/9        unassigned      YES manual down                  down 
+     FastEthernet0/10       unassigned      YES manual down                  down 
+     FastEthernet0/11       unassigned      YES manual down                  down 
+     FastEthernet0/12       unassigned      YES manual down                  down 
+     FastEthernet0/13       unassigned      YES manual down                  down 
+     FastEthernet0/14       unassigned      YES manual down                  down 
+     FastEthernet0/15       unassigned      YES manual down                  down 
+     FastEthernet0/16       unassigned      YES manual down                  down 
+     FastEthernet0/17       unassigned      YES manual down                  down 
+     FastEthernet0/18       unassigned      YES manual down                  down 
+     FastEthernet0/19       unassigned      YES manual down                  down 
+     FastEthernet0/20       unassigned      YES manual down                  down 
+     FastEthernet0/21       unassigned      YES manual down                  down 
 
 f.	Подсоедините кабель Ethernet компьютера PC-A к порту 6 на коммутаторе и изучите IP-свойства интерфейса SVI сети VLAN 1. Дождитесь согласования параметров скорости и дуплекса между коммутатором и ПК.
 
 Какие выходные данные вы видите?
 
-     SW0#show ip int br
-  Interface              IP-Address      OK? Method Status                Protocol 
-  FastEthernet0/1        unassigned      YES manual down                  down 
-  FastEthernet0/2        unassigned      YES manual down                  down 
-  FastEthernet0/3        unassigned      YES manual down                  down 
-  FastEthernet0/4        unassigned      YES manual down                  down 
-  FastEthernet0/5        unassigned      YES manual down                  down 
-  FastEthernet0/6        unassigned      YES manual up                    up 
-  FastEthernet0/7        unassigned      YES manual down                  down 
-  FastEthernet0/8        unassigned      YES manual down                  down 
-  FastEthernet0/9        unassigned      YES manual down                  down 
-  FastEthernet0/10       unassigned      YES manual down                  down 
-  FastEthernet0/11       unassigned      YES manual down                  down 
-  FastEthernet0/12       unassigned      YES manual down                  down 
-  FastEthernet0/13       unassigned      YES manual down                  down 
-  FastEthernet0/14       unassigned      YES manual down                  down 
-  FastEthernet0/15       unassigned      YES manual down                  down 
-  FastEthernet0/16       unassigned      YES manual down                  down 
-  FastEthernet0/17       unassigned      YES manual down                  down 
-  FastEthernet0/18       unassigned      YES manual down                  down 
-  FastEthernet0/19       unassigned      YES manual down                  down 
-  FastEthernet0/20       unassigned      YES manual down                  down 
-  FastEthernet0/21       unassigned      YES manual down                  down        
+     *show ip int br*
+
+     Interface              IP-Address      OK? Method Status                Protocol 
+     FastEthernet0/1        unassigned      YES manual down                  down 
+     FastEthernet0/2        unassigned      YES manual down                  down 
+     FastEthernet0/3        unassigned      YES manual down                  down 
+     FastEthernet0/4        unassigned      YES manual down                  down 
+     FastEthernet0/5        unassigned      YES manual down                  down 
+     FastEthernet0/6        unassigned      YES manual up                    up 
+     FastEthernet0/7        unassigned      YES manual down                  down 
+     FastEthernet0/8        unassigned      YES manual down                  down 
+     FastEthernet0/9        unassigned      YES manual down                  down 
+     FastEthernet0/10       unassigned      YES manual down                  down 
+     FastEthernet0/11       unassigned      YES manual down                  down 
+     FastEthernet0/12       unassigned      YES manual down                  down 
+     FastEthernet0/13       unassigned      YES manual down                  down 
+     FastEthernet0/14       unassigned      YES manual down                  down 
+     FastEthernet0/15       unassigned      YES manual down                  down 
+     FastEthernet0/16       unassigned      YES manual down                  down 
+     FastEthernet0/17       unassigned      YES manual down                  down 
+     FastEthernet0/18       unassigned      YES manual down                  down 
+     FastEthernet0/19       unassigned      YES manual down                  down 
+     FastEthernet0/20       unassigned      YES manual down                  down 
+     FastEthernet0/21       unassigned      YES manual down                  down        
 
 g.	Изучите сведения о версии ОС Cisco IOS на коммутаторе.
 
-Вводим команду *shoe version*
+Вводим команду 
+
+      *show version*
 
 Под управлением какой версии ОС Cisco IOS работает коммутатор?
 
@@ -112,7 +124,9 @@ g.	Изучите сведения о версии ОС Cisco IOS на комм�
 
 h.	Изучите свойства по умолчанию интерфейса FastEthernet, который используется компьютером PC-A.
 
-Вводим *show interface f0/6*.
+Вводим 
+
+     *show interface f0/6*.
 
 Интерфейс включен или выключен?
 
@@ -120,15 +134,24 @@ h.	Изучите свойства по умолчанию интерфейса 
 
 Что нужно сделать, чтобы включить интерфейс?
 
-- Зайти в глобальную конфигурацию *conf t*; войти в нужный интерфейс *int f0/6* ; разрешить интерфейсу работать *no shutdown*.
+- Зайти в глобальную конфигурацию 
+
+     *conf t*; 
+   
+войти в нужный интерфейс 
+   
+      *int f0/6* ; 
+      
+разрешить интерфейсу работать 
+
+     *no shutdown*.
 
 i.	Изучите флеш-память.
 
 Выполнияем следующие команды, чтобы изучить содержимое флеш-каталога.(команды равнозначны):
 
-*show flash*
-
-*dir flash:* 
+     *show flash*
+     *dir flash:* 
 
 В конце имени файла указано расширение, например .bin. Каталоги не имеют расширения файла.
 
@@ -139,6 +162,37 @@ i.	Изучите флеш-память.
 ### Часть 2. Настройка базовых параметров сетевых устройств
 
 #### 1.1 Настройка базовых параметров коммутатора
+
+a. В режиме глобальной конфигурации выставляем базовые параметры
+
+     *enable;* 
+     *conf t;*
+     *no ip domain-lookup
+     hostname S1
+     service password-encryption
+     enable secret class
+     banner motd # Unauthorized access is strictly prohibited. #* 
+
+b. Назначаем IP-адрес интерфейсу SVI на коммутаторе. Благодаря этому получаем возможность удаленного управления коммутатором. Прежде чем сможем управлять коммутатором S1 удаленно с компьютера PC-A, коммутатору нужно назначить IP-адрес. Согласно конфигурации по умолчанию коммутатором можно управлять через VLAN 1.
+ 
+ Устройство | Интерфейс | IP-адрес/префикс
+:------------:|:-----------:|:------------------:
+ S1         | VLAN 1    | 192.168.1.2/24
+ PC-1       | NIC       | 192.168.1.10/24
+
+       *enable*
+       *conf t*
+       *int vlan 1*
+       *ip address 192.168.1.2 255.255.255.0*
+
+
+c. Доступ через порт консоли ограничиваем с помощью пароля. Используем *cisco* в качестве пароля для входа в консоль. Конфигурация по умолчанию разрешает все консольные подключения без пароля. Чтобы консольные сообщения не прерывали выполнение команд, используем параметр *logging synchronous*.
+  
+     *enable*
+      *conf t*
+      *line con 0*
+      *logging synchronous*
+
 
 
 #### 1.2 Настройка IP-адрес на компьютере PC-A.
