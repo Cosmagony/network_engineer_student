@@ -375,52 +375,306 @@ end
 
 ### Часть 3. Настройка коммутатора для доступа по протоколу SSH
 
-
-### Часть 4. SSH через интерфейс командной строки (CLI) коммутатора
-
-#### Шаг 1. Настройте основные параметры коммутатора.
+#### Шаг 3.1. Настройте основные параметры коммутатора.
 
 a.	Подключитесь к коммутатору с помощью консольного подключения и активируйте привилегированный режим EXEC.
-
 b.	Войдите в режим конфигурации.
-
 c.	Отключите поиск DNS, чтобы предотвратить попытки маршрутизатора неверно преобразовывать введенные команды таким образом, как будто они являются именами узлов.
+
+```
+Switch>
+Switch>enable 
+Switch#conf t
+Enter configuration commands, one per line.  End with CNTL/Z.
+Switch(config)#hostname SW1
+SW1(config)#no ip domain-lookup 
+```
 
 d.	Назначьте class в качестве зашифрованного пароля привилегированного режима EXEC.
 
+```
+SW1(config)#enable secret class
+```
+
 e.	Назначьте cisco в качестве пароля консоли и включите вход в систему по паролю.
+
+```
+SW1(config)#line console 0
+SW1(config-line)#password cisco
+SW1(config-line)#login
+```
 
 f.	Назначьте cisco в качестве пароля VTY и включите вход в систему по паролю.
 
+```
+SW1(config)#line vty 0 15
+SW1(config-line)#password cisco
+SW1(config-line)#login
+```
+
 g.	Зашифруйте открытые пароли.
+
+```
+SW1(config)#service password-encryption
+```
 
 h.	Создайте баннер, который предупреждает о запрете несанкционированного доступа.
 
+```
+SW1(config)#banner motd #kto prochital, tot molodec, no 3ahodit ne nado#
+```
+
 i.	Настройте и активируйте на коммутаторе интерфейс VLAN 1, используя информацию, приведенную в таблице адресации.
+
+```
+SW1(config)#interface vlan 1
+SW1(config-if)#ip address 192.168.1.11 255.255.255.0
+SW1(config-if)#no shutdown 
+
+SW1(config-if)#
+%LINK-5-CHANGED: Interface Vlan1, changed state to up
+
+%LINEPROTO-5-UPDOWN: Line protocol on Interface Vlan1, changed state to up
+exit
+SW1(config)#ip de
+SW1(config)#ip default-gateway 192.168.1.1
+```
 
 j.	Сохраните текущую конфигурацию в файл загрузочной конфигурации.
 
-#### Шаг 2. Настройте коммутатор для соединения по протоколу SSH.
+```
+SW1(config)#exit
+SW1#
+%SYS-5-CONFIG_I: Configured from console by console
+
+SW1#wr
+Building configuration...
+[OK]
+```
+Проверка
+
+```
+SW1#show running-config 
+Building configuration...
+
+Current configuration : 1333 bytes
+!
+version 15.0
+no service timestamps log datetime msec
+no service timestamps debug datetime msec
+service password-encryption
+!
+hostname SW1
+!
+enable secret 5 $1$mERr$9cTjUIEqNGurQiFU.ZeCi1
+!
+!
+!
+no ip domain-lookup
+!
+!
+!
+spanning-tree mode pvst
+spanning-tree extend system-id
+!
+interface FastEthernet0/1
+!
+interface FastEthernet0/2
+!
+interface FastEthernet0/3
+!
+interface FastEthernet0/4
+!
+interface FastEthernet0/5
+!
+interface FastEthernet0/6
+!
+interface FastEthernet0/7
+!
+interface FastEthernet0/8
+!
+interface FastEthernet0/9
+!
+interface FastEthernet0/10
+!
+interface FastEthernet0/11
+!
+interface FastEthernet0/12
+!
+interface FastEthernet0/13
+!
+interface FastEthernet0/14
+!
+interface FastEthernet0/15
+!
+interface FastEthernet0/16
+!
+interface FastEthernet0/17
+!
+interface FastEthernet0/18
+!
+interface FastEthernet0/19
+!
+interface FastEthernet0/20
+!
+interface FastEthernet0/21
+!
+interface FastEthernet0/22
+!
+interface FastEthernet0/23
+!
+interface FastEthernet0/24
+!
+interface GigabitEthernet0/1
+!
+interface GigabitEthernet0/2
+!
+interface Vlan1
+ ip address 192.168.1.11 255.255.255.0
+!
+ip default-gateway 192.168.1.1
+!
+banner motd ^Ckto prochital, tot molodec, no 3ahodit ne nado^C
+!
+!
+!
+line con 0
+ password 7 0822455D0A16
+ login
+!
+line vty 0 4
+ password 7 0822455D0A16
+ login
+line vty 5 15
+ password 7 0822455D0A16
+ login
+!
+!
+end
+```
+
+#### Шаг 3.2. Настройте коммутатор для соединения по протоколу SSH.
 
 Для настройки протокола SSH на коммутаторе используйте те же команды, которые применялись для аналогичной настройки маршрутизатора в части 2.
 
 a.	Настройте имя устройства, как указано в таблице адресации.
 
+```
+Switch(config)#hostname SW1
+```
+
 b.	Задайте домен для устройства.
+
+```
+SW1(config)#ip domain-name otus.suto
+```
 
 c.	Создайте ключ шифрования с указанием его длины.
 
+
+```
+SW1(config)#crypto key generate rsa general-keys 
+The name for the keys will be: SW1.otus.suto
+Choose the size of the key modulus in the range of 360 to 2048 for your
+  General Purpose Keys. Choosing a key modulus greater than 512 may take
+  a few minutes.
+
+How many bits in the modulus [512]: 2048
+% Generating 2048 bit RSA keys, keys will be non-exportable...[OK]
+```
+
 d.	Создайте имя пользователя в локальной базе учетных записей.
+
+```
+SW1(config)#username admin secret Admin55
+```
 
 e.	Активируйте протоколы Telnet и SSH на линиях VTY.
 
+```
+SW1(config)#line vty 0 15
+SW1(config-line)#transport input telnet 
+SW1(config-line)#transport input ssh 
+```
+
 f.	Измените способ входа в систему таким образом, чтобы использовалась проверка пользователей по локальной базе учетных записей.
-Шаг 3. Установите соединение с коммутатором по протоколу SSH.
+
+```
+SW1(config-line)#login local 
+```
+
+#### Шаг 3.3 Установите соединение с коммутатором по протоколу SSH.
+
 Запустите программу Tera Term на PC-A, затем установите подключение по протоколу SSH к интерфейсу SVI коммутатора S1.
 
-Вопрос:
-Удалось ли вам установить SSH-соединение с коммутатором?
+![alt text](image-6.png)
 
+Вопрос:
+- Удалось ли вам установить SSH-соединение с коммутатором?: Да, удалось
+
+### Часть 4. SSH через интерфейс командной строки (CLI) коммутатора
+
+#### Шаг 4.1. Посмотрите доступные параметры для клиента SSH в Cisco IOS.
+
+Используйте вопросительный знак (?), чтобы отобразить варианты параметров для команды ssh.
+
+```
+SW1#ssh ?
+  -l  Log in using this user name
+  -v  Specify SSH Protocol Version
+```
+
+#### Шаг 4.2. Установите с коммутатора S1 соединение с маршрутизатором R1 по протоколу SSH.
+
+a.	Чтобы подключиться к маршрутизатору R1 по протоколу SSH, введите команду –l admin. Это позволит вам войти в систему под именем admin. При появлении приглашения введите в качестве пароля Adm1nP@55
+
+```
+SW1#ssh -l admin 192.168.1.1
+
+Password: 
+
+banner, kotoruy preduprejdaet o 3aprete nesankcionirovannogo dostupa
+
+R1>
+```
+
+b.	Чтобы вернуться к коммутатору S1, не закрывая сеанс SSH с маршрутизатором R1, нажмите комбинацию клавиш Ctrl+Shift+6. Отпустите клавиши Ctrl+Shift+6 и нажмите x. Отображается приглашение привилегированного режима EXEC коммутатора.
+
+```
+R1>
+SW1#
+```
+
+c.	Чтобы вернуться к сеансу SSH на R1, нажмите клавишу Enter в пустой строке интерфейса командной строки. Чтобы увидеть окно командной строки маршрутизатора, нажмите клавишу Enter еще раз.
+
+```
+R1>
+SW1#
+SW1#
+[Resuming connection 1 to 192.168.1.1 ... ]
+
+R1>
+R1>
+```
+
+d.	Чтобы завершить сеанс SSH на маршрутизаторе R1, введите в командной строке маршрутизатора команду exit.
+R1# exit
+
+[Connection to 192.168.1.1 closed by foreign host]
+S1#
+
+```
+R1>exit
+
+[Connection to 192.168.1.1 closed by foreign host]
+SW1#
+SW1#
+```
+
+- Какие версии протокола SSH поддерживаются при использовании интерфейса командной строки? : В циско используются всего два протокола - первый и второй.
 
 #### Вопрос для повторения
+
+- Как предоставить доступ к сетевому устройству нескольким пользователям, у каждого из которых есть собственное имя пользователя? : 
+Необхлдимо создать локальных пользователей на устройстве и настроить линии VTY для них.
 
