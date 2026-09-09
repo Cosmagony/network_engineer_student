@@ -612,7 +612,6 @@ S1(config-if)#
 %LINEPROTO-5-UPDOWN: Line protocol on Interface FastEthernet0/1, changed state to up
 
 %LINEPROTO-5-UPDOWN: Line protocol on Interface Vlan10, changed state to up
-
 ```
 
 
