@@ -4,16 +4,15 @@
 
 #### Топология
 
-![alt text](image-4.png)
+![alt text](image-10.png)
 
 #### Таблица адресации
 
-![alt text](image-2.png)
+![alt text](image-11.png)
 
 #### Таблица VLAN
 
-![alt text](image-1.png)
-![alt text](image-9.png)
+![alt text](image-12.png)
 
 ### Часть 1. Создание и настройка сети
 
