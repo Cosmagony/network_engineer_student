@@ -481,55 +481,714 @@ S2#show interfaces f0/1 switchport | include Negotiation
 Negotiation of Trunking: Off
 ```
 
+![alt text](image-1.png)
+
 #### Шаг 3.2. Настройка портов доступа
 
 a.	На S1 настройте F0/5 и F0/6 в качестве портов доступа и свяжите их с VLAN 10.
 
 ```
-
-```
-
-
-```
-
+S1(config)#int range f0/5, f0/6
+S1(config-if-range)#sw
+S1(config-if-range)#switchport m
+S1(config-if-range)#switchport mode ac
+S1(config-if-range)#switchport mode access 
+S1(config-if-range)#sw
+S1(config-if-range)#switchport ac
+S1(config-if-range)#switchport access v
+S1(config-if-range)#switchport access vlan 10
+S1(config-if-range)#no sh
 ```
 
 
 b.	На S2 настройте порт доступа Fa0/18 и свяжите его с VLAN 10.
 
 ```
-
+S2(config)#int
+S2(config)#interface ra
+S2(config)#interface ra
+S2(config)#interface range f0/18
+S2(config-if-range)#sw
+S2(config-if-range)#switchport m
+S2(config-if-range)#switchport mode a
+S2(config-if-range)#switchport mode access 
+S2(config-if-range)#sw
+S2(config-if-range)#switchport ac
+S2(config-if-range)#switchport access vl
+S2(config-if-range)#switchport access vlan 10
+S2(config-if-range)#no sh
+S2(config-if-range)#no shutdown 
 ```
-
-
-
-```
-
-```
-
 
 #### Шаг 3.3. Безопасность неиспользуемых портов коммутатора
+
+a.	На S1 и S2 переместите неиспользуемые порты из VLAN 1 в VLAN 999 и отключите неиспользуемые порты.
+
+эТОТ ВЛАН уже был создан ранее, осталось переместить
+
+```
+S1(config)#interface ra
+S1(config)#interface range f0/2-4, f0/7-24, g0/1-2
+S1(config-if-range)#sw
+S1(config-if-range)#switchport m
+S1(config-if-range)#switchport mode ac
+S1(config-if-range)#switchport mode access 
+S1(config-if-range)#sw
+S1(config-if-range)#switchport a
+S1(config-if-range)#switchport access vl
+S1(config-if-range)#switchport access vlan 999
+S1(config-if-range)#shu
+S1(config-if-range)#shutdown 
+
+%LINK-5-CHANGED: Interface FastEthernet0/2, changed state to administratively down
+
+%LINK-5-CHANGED: Interface FastEthernet0/3, changed state to administratively down
+
+%LINK-5-CHANGED: Interface FastEthernet0/4, changed state to administratively down
+
+%LINK-5-CHANGED: Interface FastEthernet0/7, changed state to administratively down
+
+%LINK-5-CHANGED: Interface FastEthernet0/8, changed state to administratively down
+
+%LINK-5-CHANGED: Interface FastEthernet0/9, changed state to administratively down
+
+%LINK-5-CHANGED: Interface FastEthernet0/10, changed state to administratively down
+
+%LINK-5-CHANGED: Interface FastEthernet0/11, changed state to administratively down
+
+%LINK-5-CHANGED: Interface FastEthernet0/12, changed state to administratively down
+
+%LINK-5-CHANGED: Interface FastEthernet0/13, changed state to administratively down
+
+%LINK-5-CHANGED: Interface FastEthernet0/14, changed state to administratively down
+
+%LINK-5-CHANGED: Interface FastEthernet0/15, changed state to administratively down
+
+%LINK-5-CHANGED: Interface FastEthernet0/16, changed state to administratively down
+
+%LINK-5-CHANGED: Interface FastEthernet0/17, changed state to administratively down
+
+%LINK-5-CHANGED: Interface FastEthernet0/18, changed state to administratively down
+
+%LINK-5-CHANGED: Interface FastEthernet0/19, changed state to administratively down
+
+%LINK-5-CHANGED: Interface FastEthernet0/20, changed state to administratively down
+
+%LINK-5-CHANGED: Interface FastEthernet0/21, changed state to administratively down
+
+%LINK-5-CHANGED: Interface FastEthernet0/22, changed state to administratively down
+
+%LINK-5-CHANGED: Interface FastEthernet0/23, changed state to administratively down
+
+%LINK-5-CHANGED: Interface FastEthernet0/24, changed state to administratively down
+
+%LINK-5-CHANGED: Interface GigabitEthernet0/2, changed state to administratively down
+S1(config-if-range)#
+```
+
+
+```
+S2(config)#in
+S2(config)#interface r
+S2(config)#interface range f0/2-17, f0/19-24, g0/1-2
+S2(config-if-range)#sw
+S2(config-if-range)#switchport m
+S2(config-if-range)#switchport mode a
+S2(config-if-range)#switchport mode access 
+S2(config-if-range)#sw
+S2(config-if-range)#switchport a
+S2(config-if-range)#switchport access v
+S2(config-if-range)#switchport access vlan 999
+S2(config-if-range)#sh
+S2(config-if-range)#shutdown 
+
+%LINK-5-CHANGED: Interface FastEthernet0/2, changed state to administratively down
+
+%LINK-5-CHANGED: Interface FastEthernet0/3, changed state to administratively down
+
+%LINK-5-CHANGED: Interface FastEthernet0/4, changed state to administratively down
+
+%LINK-5-CHANGED: Interface FastEthernet0/5, changed state to administratively down
+
+%LINK-5-CHANGED: Interface FastEthernet0/6, changed state to administratively down
+
+%LINK-5-CHANGED: Interface FastEthernet0/7, changed state to administratively down
+
+%LINK-5-CHANGED: Interface FastEthernet0/8, changed state to administratively down
+
+%LINK-5-CHANGED: Interface FastEthernet0/9, changed state to administratively down
+
+%LINK-5-CHANGED: Interface FastEthernet0/10, changed state to administratively down
+
+%LINK-5-CHANGED: Interface FastEthernet0/11, changed state to administratively down
+
+%LINK-5-CHANGED: Interface FastEthernet0/12, changed state to administratively down
+
+%LINK-5-CHANGED: Interface FastEthernet0/13, changed state to administratively down
+
+%LINK-5-CHANGED: Interface FastEthernet0/14, changed state to administratively down
+
+%LINK-5-CHANGED: Interface FastEthernet0/15, changed state to administratively down
+
+%LINK-5-CHANGED: Interface FastEthernet0/16, changed state to administratively down
+
+%LINK-5-CHANGED: Interface FastEthernet0/17, changed state to administratively down
+
+%LINK-5-CHANGED: Interface FastEthernet0/19, changed state to administratively down
+
+%LINK-5-CHANGED: Interface FastEthernet0/20, changed state to administratively down
+
+%LINK-5-CHANGED: Interface FastEthernet0/21, changed state to administratively down
+
+%LINK-5-CHANGED: Interface FastEthernet0/22, changed state to administratively down
+
+%LINK-5-CHANGED: Interface FastEthernet0/23, changed state to administratively down
+
+%LINK-5-CHANGED: Interface FastEthernet0/24, changed state to administratively down
+
+%LINK-5-CHANGED: Interface GigabitEthernet0/1, changed state to administratively down
+
+%LINK-5-CHANGED: Interface GigabitEthernet0/2, changed state to administratively down
+S2(config-if-range)#
+```
+
+b.	Убедитесь, что неиспользуемые порты отключены и связаны с VLAN 999, введя команду  show.
+S1# show interfaces status
+
+```
+S1#show interfaces status 
+Port      Name               Status       Vlan       Duplex  Speed Type
+Fa0/1     trunk_S2_f0/1      connected    trunk      auto    auto  10/100BaseTX
+Fa0/2                        disabled 999        auto    auto  10/100BaseTX
+Fa0/3                        disabled 999        auto    auto  10/100BaseTX
+Fa0/4                        disabled 999        auto    auto  10/100BaseTX
+Fa0/5     trunk_R1_g0/0/1    connected    10         auto    auto  10/100BaseTX
+Fa0/6     access_PC-A        connected    10         auto    auto  10/100BaseTX
+Fa0/7                        disabled 999        auto    auto  10/100BaseTX
+Fa0/8                        disabled 999        auto    auto  10/100BaseTX
+Fa0/9                        disabled 999        auto    auto  10/100BaseTX
+Fa0/10                       disabled 999        auto    auto  10/100BaseTX
+Fa0/11                       disabled 999        auto    auto  10/100BaseTX
+Fa0/12                       disabled 999        auto    auto  10/100BaseTX
+Fa0/13                       disabled 999        auto    auto  10/100BaseTX
+Fa0/14                       disabled 999        auto    auto  10/100BaseTX
+Fa0/15                       disabled 999        auto    auto  10/100BaseTX
+Fa0/16                       disabled 999        auto    auto  10/100BaseTX
+Fa0/17                       disabled 999        auto    auto  10/100BaseTX
+Fa0/18                       disabled 999        auto    auto  10/100BaseTX
+Fa0/19                       disabled 999        auto    auto  10/100BaseTX
+Fa0/20                       disabled 999        auto    auto  10/100BaseTX
+Fa0/21                       disabled 999        auto    auto  10/100BaseTX
+Fa0/22                       disabled 999        auto    auto  10/100BaseTX
+Fa0/23                       disabled 999        auto    auto  10/100BaseTX
+Fa0/24                       disabled 999        auto    auto  10/100BaseTX
+Gig0/1                       disabled 999        auto    auto  10/100BaseTX
+Gig0/2                       disabled 999        auto    auto  10/100BaseTX
+
+```
+
+Переименую f0/5 так как это не транковый порт
+
+```
+S1(config)#int
+S1(config)#interface f0/5
+S1(config-if)#de
+S1(config-if)#description Access_R1_g0/0/1
+S1(config-if)#
+```
+
+
+```
+S2#show interfaces status 
+Port      Name               Status       Vlan       Duplex  Speed Type
+Fa0/1     trunk_S1_f0/1      connected    trunk      auto    auto  10/100BaseTX
+Fa0/2                        disabled 999        auto    auto  10/100BaseTX
+Fa0/3                        disabled 999        auto    auto  10/100BaseTX
+Fa0/4                        disabled 999        auto    auto  10/100BaseTX
+Fa0/5                        disabled 999        auto    auto  10/100BaseTX
+Fa0/6                        disabled 999        auto    auto  10/100BaseTX
+Fa0/7                        disabled 999        auto    auto  10/100BaseTX
+Fa0/8                        disabled 999        auto    auto  10/100BaseTX
+Fa0/9                        disabled 999        auto    auto  10/100BaseTX
+Fa0/10                       disabled 999        auto    auto  10/100BaseTX
+Fa0/11                       disabled 999        auto    auto  10/100BaseTX
+Fa0/12                       disabled 999        auto    auto  10/100BaseTX
+Fa0/13                       disabled 999        auto    auto  10/100BaseTX
+Fa0/14                       disabled 999        auto    auto  10/100BaseTX
+Fa0/15                       disabled 999        auto    auto  10/100BaseTX
+Fa0/16                       disabled 999        auto    auto  10/100BaseTX
+Fa0/17                       disabled 999        auto    auto  10/100BaseTX
+Fa0/18    access_PC-B        connected    10         auto    auto  10/100BaseTX
+Fa0/19                       disabled 999        auto    auto  10/100BaseTX
+Fa0/20                       disabled 999        auto    auto  10/100BaseTX
+Fa0/21                       disabled 999        auto    auto  10/100BaseTX
+Fa0/22                       disabled 999        auto    auto  10/100BaseTX
+Fa0/23                       disabled 999        auto    auto  10/100BaseTX
+Fa0/24                       disabled 999        auto    auto  10/100BaseTX
+Gig0/1                       disabled 999        auto    auto  10/100BaseTX
+Gig0/2                       disabled 999        auto    auto  10/100BaseTX
+```
 
 
 #### Шаг 3.4. Документирование и реализация функций безопасности порта.
 
+Интерфейсы F0/6 на S1 и F0/18 на S2 настроены как порты доступа. На этом шаге вы также настроите безопасность портов на этих двух портах доступа.
 
+a.	На S1, введите команду show port-security interface f0/6  для отображения настроек по умолчанию безопасности порта для интерфейса F0/6. Запишите свои ответы ниже.
+
+
+```
+S1#show port-security interface f0/6
+```
+
+
+ Функция                | Настройка по умолчанию
+:----------------------:|:--------------------------------:
+ Защита портов          |    Disabled
+ Максимальное количество записей MAC-адресов  | 1
+ Режим проверки на нарушение безопасности     | shutdown
+ Aging Time                      |   0 mins
+ Aging Type                     |   Absolute  
+ Secure Static Address Aging   | 	Disabled 
+ Sticky MAC Address            | 0
+
+
+```
+S1(config)#int f0/6
+S1(config-if)#sw
+S1(config-if)#switchport ?
+  access         Set access mode characteristics of the interface
+  mode           Set trunking mode of the interface
+  nonegotiate    Device will not engage in negotiation protocol on this
+                 interface
+  port-security  Security related command
+  priority       Set appliance 802.1p priority
+  protected      Configure an interface to be a protected port
+  trunk          Set trunking characteristics of the interface
+  voice          Voice appliance attributes
+S1(config-if)#switchport p
+S1(config-if)#switchport po
+S1(config-if)#switchport port-security 
+S1(config-if)#switchport port-security ma
+S1(config-if)#switchport port-security ?
+  aging        Port-security aging commands
+  mac-address  Secure mac address
+  maximum      Max secure addresses
+  violation    Security violation mode
+  <cr>
+S1(config-if)#switchport port-security max 3
+S1(config-if)#switchport port-security ?
+  aging        Port-security aging commands
+  mac-address  Secure mac address
+  maximum      Max secure addresses
+  violation    Security violation mode
+  <cr>
+S1(config-if)#switchport port-security v
+S1(config-if)#switchport port-security violation re
+S1(config-if)#switchport port-security violation restrict 
+S1(config-if)#switchport port-security ag
+S1(config-if)#switchport port-security aging t
+S1(config-if)#switchport port-security aging time 60
+S1(config-if)#switchport port-security agin
+S1(config-if)#switchport port-security aging t
+S1(config-if)#switchport port-security aging ty
+S1(config-if)#switchport port-security aging typ
+S1(config-if)#switchport port-security aging 
+% Incomplete command.
+S1(config-if)#switchport port-security aging ?
+  time  Port-security aging time
+S1(config-if)#switchport port-security aging type ne
+S1(config-if)#switchport port-security aging type in
+S1(config-if)#switchport port-security aging type inactivity
+                                              ^
+% Invalid input detected at '^' marker.
+	
+S1(config-if)#switchport port-security ?
+  aging        Port-security aging commands
+  mac-address  Secure mac address
+  maximum      Max secure addresses
+  violation    Security violation mode
+  <cr>
+S1(config-if)#switchport port-security ag
+S1(config-if)#switchport port-security aging ?
+  time  Port-security aging time
+```
+
+aging type не поддерживается в моей рабочей версии пакеттрейсер 
+
+c.	Verify port security on S1 F0/6.
+S1# show port-security interface f0/6
+
+```
+S1#show port-security interface f0/6
+Port Security              : Enabled
+Port Status                : Secure-up
+Violation Mode             : Restrict
+Aging Time                 : 60 mins
+Aging Type                 : Absolute
+SecureStatic Address Aging : Disabled
+Maximum MAC Addresses      : 3
+Total MAC Addresses        : 0
+Configured MAC Addresses   : 0
+Sticky MAC Addresses       : 0
+Last Source Address:Vlan   : 0000.0000.0000:0
+Security Violation Count   : 0
+
+S1#show port-security address 
+               Secure Mac Address Table
+-----------------------------------------------------------------------------
+Vlan    Mac Address       Type                          Ports   Remaining Age
+                                                                   (mins)
+----    -----------       ----                          -----   -------------
+-----------------------------------------------------------------------------
+Total Addresses in System (excluding one mac per port)     : 0
+Max Addresses limit in System (excluding one mac per port) : 1024
+```
+
+d.	Включите безопасность порта для F0 / 18 на S2. Настройте каждый активный порт доступа таким образом, чтобы он автоматически добавлял адреса МАС, изученные на этом порту, в текущую конфигурацию.
+e.	Настройте следующие параметры безопасности порта на S2 F / 18:
+o	Максимальное количество записей MAC-адресов: 2
+o	Тип безопасности: Protect
+o	Aging time: 60 мин.
+
+```
+S2(config)#int f0/18
+S2(config-if)#sw
+S2(config-if)#switchport p
+S2(config-if)#switchport po
+S2(config-if)#switchport port-security 
+S2(config-if)#switchport port-security ma
+S2(config-if)#switchport port-security max
+S2(config-if)#switchport port-security maximum 2
+S2(config-if)#switchport port-security vi
+S2(config-if)#switchport port-security violation pr
+S2(config-if)#switchport port-security violation protect 
+S2(config-if)#switchport port-security ma
+S2(config-if)#switchport port-security mac-
+S2(config-if)#switchport port-security mac-address ?
+  H.H.H   48 bit mac address
+  sticky  Configure dynamic secure addresses as sticky
+S2(config-if)#switchport port-security violation protect s
+S2(config-if)#switchport port-security mac
+S2(config-if)#switchport port-security mac-address s
+S2(config-if)#switchport port-security mac-address sticky 
+S2(config-if)#switchport port-security 
+S2(config-if)#switchport port-security ?
+  aging        Port-security aging commands
+  mac-address  Secure mac address
+  maximum      Max secure addresses
+  violation    Security violation mode
+  <cr>
+S2(config-if)#switchport port-security ag
+S2(config-if)#switchport port-security aging t
+S2(config-if)#switchport port-security aging time 60
+```
+
+f.	Проверка функции безопасности портов на S2 F0/18.
+S2# show port-security interface f0/18
+
+```
+S2#show port-security interface f0/18
+Port Security              : Enabled
+Port Status                : Secure-up
+Violation Mode             : Protect
+Aging Time                 : 60 mins
+Aging Type                 : Absolute
+SecureStatic Address Aging : Disabled
+Maximum MAC Addresses      : 2
+Total MAC Addresses        : 0
+Configured MAC Addresses   : 0
+Sticky MAC Addresses       : 0
+Last Source Address:Vlan   : 0000.0000.0000:0
+Security Violation Count   : 0
+```
+
+От ПК не приходили МАКи так как забыла включить DHCP.
+
+```
+S1#show port-security interface f0/6
+Port Security              : Enabled
+Port Status                : Secure-up
+Violation Mode             : Restrict
+Aging Time                 : 60 mins
+Aging Type                 : Absolute
+SecureStatic Address Aging : Disabled
+Maximum MAC Addresses      : 3
+Total MAC Addresses        : 1
+Configured MAC Addresses   : 0
+Sticky MAC Addresses       : 0
+Last Source Address:Vlan   : 00E0.A301.5190:10
+Security Violation Count   : 0
+
+S1#show port-security interface f0/6
+Port Security              : Enabled
+Port Status                : Secure-up
+Violation Mode             : Restrict
+Aging Time                 : 60 mins
+Aging Type                 : Absolute
+SecureStatic Address Aging : Disabled
+Maximum MAC Addresses      : 3
+Total MAC Addresses        : 1
+Configured MAC Addresses   : 0
+Sticky MAC Addresses       : 0
+Last Source Address:Vlan   : 00E0.A301.5190:10
+Security Violation Count   : 0
+
+S1#show port-security ADD
+               Secure Mac Address Table
+-----------------------------------------------------------------------------
+Vlan    Mac Address       Type                          Ports   Remaining Age
+                                                                   (mins)
+----    -----------       ----                          -----   -------------
+10	00E0.A301.5190	DynamicConfigured	FastEthernet0/6		-
+-----------------------------------------------------------------------------
+Total Addresses in System (excluding one mac per port)     : 0
+Max Addresses limit in System (excluding one mac per port) : 1024
+S1#
+```
 
 #### Шаг 3.5. Реализовать безопасность DHCP snooping.
 
+a.	На S2 включите DHCP snooping и настройте DHCP snooping во VLAN 10.
+
+```
+S2(config)#ip d
+S2(config)#ip dh
+S2(config)#ip dhcp s
+S2(config)#ip dhcp snooping 
+S2(config)#ip dhcp snooping vl
+S2(config)#ip dhcp snooping vlan 10
+```
+
+b.	Настройте магистральные порты на S2 как доверенные порты.
+
+Магистральный порт у нас f0/1
+
+```
+S2(config)#int f0/1
+S2(config-if)#ip dh
+S2(config-if)#ip dhcp sn
+S2(config-if)#ip dhcp snooping tr
+S2(config-if)#ip dhcp snooping trust 
+```
+
+c.	Ограничьте ненадежный порт Fa0/18 на S2 пятью DHCP-пакетами в секунду.
+
+```
+S2#conf t
+Enter configuration commands, one per line.  End with CNTL/Z.
+S2(config)#int f0/18
+S2(config-if)#ip dhcp snooping l
+S2(config-if)#ip dhcp snooping limit r
+S2(config-if)#ip dhcp snooping limit rate 5
+S2(config-if)#end
+S2#
+%SYS-5-CONFIG_I: Configured from console by console
+show ip dhcp snooping 
+Switch DHCP snooping is enabled
+DHCP snooping is configured on following VLANs:
+10
+Insertion of option 82 is enabled
+Option 82 on untrusted port is not allowed
+Verification of hwaddr field is enabled
+Interface                  Trusted    Rate limit (pps)
+-----------------------    -------    ----------------
+FastEthernet0/1            yes        unlimited       
+FastEthernet0/18           no         5         
+```
+
+d.	Проверка DHCP Snooping на S2.
+S2# show ip dhcp snooping
+
+```
+S2#
+%SYS-5-CONFIG_I: Configured from console by console
+show ip dhcp snooping 
+Switch DHCP snooping is enabled
+DHCP snooping is configured on following VLANs:
+10
+Insertion of option 82 is enabled
+Option 82 on untrusted port is not allowed
+Verification of hwaddr field is enabled
+Interface                  Trusted    Rate limit (pps)
+-----------------------    -------    ----------------
+FastEthernet0/1            yes        unlimited       
+FastEthernet0/18           no         5          
+```
+
+e.	В командной строке на PC-B освободите, а затем обновите IP-адрес.
+C:\Users\Student> ipconfig /release
+C:\Users\Student> ipconfig /renew
+
+```
+C:\>ipconfig /release
+
+   IP Address......................: 0.0.0.0
+   Subnet Mask.....................: 0.0.0.0
+   Default Gateway.................: 0.0.0.0
+   DNS Server......................: 0.0.0.0
+
+C:\>ipconfig /renew
+
+   IP Address......................: 192.168.10.11
+   Subnet Mask.....................: 255.255.255.0
+   Default Gateway.................: 192.168.10.1
+   DNS Server......................: 0.0.0.0
+```
+
+f.	Проверьте привязку отслеживания DHCP с помощью команды show ip dhcp snooping binding.
 
 
-#### Шаг 3.6. Реализация PortFast и BPDU Guard
+```
+S2#show ip dhcp snooping binding 
+MacAddress          IpAddress        Lease(sec)  Type           VLAN  Interface
+------------------  ---------------  ----------  -------------  ----  -----------------
+00:60:47:DE:6E:CB   192.168.10.11    0           dhcp-snooping  10    FastEthernet0/18
+Total number of bindings: 1
+```
+
+#### Шаг 3.6. Реализация PortFast и BPDU Guard.
+
+a.	Настройте PortFast на всех портах доступа, которые используются на обоих коммутаторах.
+
+```
+S1(config)#int
+S1(config)#interface R
+S1(config)#interface Range f0/5, f0/6
+S1(config-if-range)#sp
+S1(config-if-range)#spa
+S1(config-if-range)#spanning-tree po
+S1(config-if-range)#spanning-tree portfast 
+%Warning: portfast should only be enabled on ports connected to a single
+host. Connecting hubs, concentrators, switches, bridges, etc... to this
+interface  when portfast is enabled, can cause temporary bridging loops.
+Use with CAUTION
+
+%Portfast has been configured on FastEthernet0/5 but will only
+have effect when the interface is in a non-trunking mode.
+%Warning: portfast should only be enabled on ports connected to a single
+host. Connecting hubs, concentrators, switches, bridges, etc... to this
+interface  when portfast is enabled, can cause temporary bridging loops.
+Use with CAUTION
+
+%Portfast has been configured on FastEthernet0/6 but will only
+have effect when the interface is in a non-trunking mode.
+S1(config-if-range)#
+```
 
 
+```
+S2(config)#int f0/18
+S2(config-if)#spa
+S2(config-if)#spanning-tree po
+S2(config-if)#spanning-tree portfast 
+%Warning: portfast should only be enabled on ports connected to a single
+host. Connecting hubs, concentrators, switches, bridges, etc... to this
+interface  when portfast is enabled, can cause temporary bridging loops.
+Use with CAUTION
+
+%Portfast has been configured on FastEthernet0/18 but will only
+have effect when the interface is in a non-trunking mode.
+S2(config-if)#
+```
+
+b.	Включите защиту BPDU на портах доступа VLAN 10 S1 и S2, подключенных к PC-A и PC-B.
+
+```
+S1(config)#int f0/6
+S1(config-if)#sp
+S1(config-if)#spa
+S1(config-if)#spanning-tree bp
+S1(config-if)#spanning-tree bpduguard en
+S1(config-if)#spanning-tree bpduguard enable 
+S1(config-if)#
+```
+
+
+```
+S2(config)#int f0/18
+S2(config-if)#spa
+S2(config-if)#spanning-tree bp
+S2(config-if)#spanning-tree bpduguard e
+S2(config-if)#spanning-tree bpduguard enable 
+```
+
+c.	Убедитесь, что защита BPDU и PortFast включены на соответствующих портах.
+
+```
+S1#show spanning-tree interface f0/6 detail 
+
+Port 6 (FastEthernet0/6) of VLAN0010 is designated forwarding
+  Port path cost 19, Port priority 128, Port Identifier 128.6
+  Designated root has priority 32778, address 0003.E48A.CC53
+  Designated bridge has priority 32778, address 00D0.580A.57A0
+  Designated port id is 128.6, designated path cost 19
+  Timers: message age 16, forward delay 0, hold 0
+  Number of transitions to forwarding state: 1
+  The port is in the portfast mode
+  Link type is point-to-point by default
+```
+
+
+```
+S2#show spanning-tree interface f0/18 detail 
+
+Port 18 (FastEthernet0/18) of VLAN0010 is designated forwarding
+  Port path cost 19, Port priority 128, Port Identifier 128.18
+  Designated root has priority 32778, address 0003.E48A.CC53
+  Designated bridge has priority 32778, address 0003.E48A.CC53
+  Designated port id is 128.18, designated path cost 19
+  Timers: message age 16, forward delay 0, hold 0
+  Number of transitions to forwarding state: 1
+  The port is in the portfast mode
+  Link type is point-to-point by default
+```
+
+Пакеттрейсер не отображает в этой команде BPDU, посмотрим через команду: S1#show running-config 
+
+```
+interface FastEthernet0/6
+ description access_PC-A
+ switchport access vlan 10
+ switchport mode access
+ switchport port-security
+ switchport port-security maximum 3
+ switchport port-security violation restrict 
+ switchport port-security aging time 60
+ spanning-tree portfast
+ spanning-tree bpduguard enable
+```
+
+```
+interface FastEthernet0/18
+ description access_PC-B
+ switchport access vlan 10
+ ip dhcp snooping limit rate 5
+ switchport mode access
+ switchport port-security
+ switchport port-security maximum 2
+ switchport port-security mac-address sticky 
+ switchport port-security violation protect 
+ switchport port-security mac-address sticky 0060.47DE.6ECB
+ switchport port-security aging time 60
+ spanning-tree portfast
+ spanning-tree bpduguard enable
+```
 
 #### Шаг 3.7. Проверьте наличие сквозного ⁪подключения.
-
-
+Проверьте PING свзяь между всеми устройствами в таблице IP-адресации. В случае сбоя проверки связи может потребоваться отключить брандмауэр на хостах.
 
 
 
 
 #### Вопрос для повторения
 
+- С точки зрения безопасности порта на S2, почему нет значения таймера для оставшегося возраста в минутах, когда было сконфигурировано динамическое обучение - sticky?
+Ответ:
+
+- Что касается безопасности порта на S2, если вы загружаете скрипт текущей конфигурации на S2, почему порту 18 на PC-B никогда не получит IP-адрес через DHCP?
+Ответ:
+
+- Что касается безопасности порта, в чем разница между типом абсолютного устаревания и типом устаревание по неактивности?
+Ответ:
 
