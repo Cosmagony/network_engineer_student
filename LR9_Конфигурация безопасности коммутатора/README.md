@@ -1178,17 +1178,175 @@ interface FastEthernet0/18
 #### Шаг 3.7. Проверьте наличие сквозного ⁪подключения.
 Проверьте PING свзяь между всеми устройствами в таблице IP-адресации. В случае сбоя проверки связи может потребоваться отключить брандмауэр на хостах.
 
+```
+C:\>ping 192.168.10.1
+
+Pinging 192.168.10.1 with 32 bytes of data:
+
+Reply from 192.168.10.1: bytes=32 time<1ms TTL=255
+Reply from 192.168.10.1: bytes=32 time<1ms TTL=255
+Reply from 192.168.10.1: bytes=32 time<1ms TTL=255
+Reply from 192.168.10.1: bytes=32 time<1ms TTL=255
+
+Ping statistics for 192.168.10.1:
+    Packets: Sent = 4, Received = 4, Lost = 0 (0% loss),
+Approximate round trip times in milli-seconds:
+    Minimum = 0ms, Maximum = 0ms, Average = 0ms
+
+C:\>ping 192.168.10.201
+
+Pinging 192.168.10.201 with 32 bytes of data:
+
+Request timed out.
+Reply from 192.168.10.201: bytes=32 time<1ms TTL=255
+Reply from 192.168.10.201: bytes=32 time<1ms TTL=255
+Reply from 192.168.10.201: bytes=32 time<1ms TTL=255
+
+Ping statistics for 192.168.10.201:
+    Packets: Sent = 4, Received = 3, Lost = 1 (25% loss),
+Approximate round trip times in milli-seconds:
+    Minimum = 0ms, Maximum = 0ms, Average = 0ms
+
+C:\>ping 192.168.10.202
+
+Pinging 192.168.10.202 with 32 bytes of data:
+
+Request timed out.
+Reply from 192.168.10.202: bytes=32 time<1ms TTL=255
+Reply from 192.168.10.202: bytes=32 time<1ms TTL=255
+Reply from 192.168.10.202: bytes=32 time<1ms TTL=255
+
+Ping statistics for 192.168.10.202:
+    Packets: Sent = 4, Received = 3, Lost = 1 (25% loss),
+Approximate round trip times in milli-seconds:
+    Minimum = 0ms, Maximum = 0ms, Average = 0ms
+
+C:\>ping 192.168.10.11
+
+Pinging 192.168.10.11 with 32 bytes of data:
+
+Reply from 192.168.10.11: bytes=32 time=1ms TTL=128
+Reply from 192.168.10.11: bytes=32 time<1ms TTL=128
+Reply from 192.168.10.11: bytes=32 time=3ms TTL=128
+Reply from 192.168.10.11: bytes=32 time<1ms TTL=128
+
+Ping statistics for 192.168.10.11:
+    Packets: Sent = 4, Received = 4, Lost = 0 (0% loss),
+Approximate round trip times in milli-seconds:
+    Minimum = 0ms, Maximum = 3ms, Average = 1ms
+
+C:\>ping 10.10.1.1
+
+Pinging 10.10.1.1 with 32 bytes of data:
+
+Reply from 10.10.1.1: bytes=32 time<1ms TTL=255
+Reply from 10.10.1.1: bytes=32 time<1ms TTL=255
+Reply from 10.10.1.1: bytes=32 time<1ms TTL=255
+Reply from 10.10.1.1: bytes=32 time<1ms TTL=255
+
+Ping statistics for 10.10.1.1:
+    Packets: Sent = 4, Received = 4, Lost = 0 (0% loss),
+Approximate round trip times in milli-seconds:
+    Minimum = 0ms, Maximum = 0ms, Average = 0ms
+```
 
 
+```
+C:\>ping 192.168.10.1
 
+Pinging 192.168.10.1 with 32 bytes of data:
+
+Reply from 192.168.10.1: bytes=32 time<1ms TTL=255
+Reply from 192.168.10.1: bytes=32 time<1ms TTL=255
+Reply from 192.168.10.1: bytes=32 time<1ms TTL=255
+Reply from 192.168.10.1: bytes=32 time<1ms TTL=255
+
+Ping statistics for 192.168.10.1:
+    Packets: Sent = 4, Received = 4, Lost = 0 (0% loss),
+Approximate round trip times in milli-seconds:
+    Minimum = 0ms, Maximum = 0ms, Average = 0ms
+
+C:\>ping 192.168.10.201
+
+Pinging 192.168.10.201 with 32 bytes of data:
+
+Request timed out.
+Reply from 192.168.10.201: bytes=32 time<1ms TTL=255
+Reply from 192.168.10.201: bytes=32 time<1ms TTL=255
+Reply from 192.168.10.201: bytes=32 time<1ms TTL=255
+
+Ping statistics for 192.168.10.201:
+    Packets: Sent = 4, Received = 3, Lost = 1 (25% loss),
+Approximate round trip times in milli-seconds:
+    Minimum = 0ms, Maximum = 0ms, Average = 0ms
+
+C:\>ping 192.168.10.202
+
+Pinging 192.168.10.202 with 32 bytes of data:
+
+Request timed out.
+Reply from 192.168.10.202: bytes=32 time<1ms TTL=255
+Reply from 192.168.10.202: bytes=32 time<1ms TTL=255
+Reply from 192.168.10.202: bytes=32 time<1ms TTL=255
+
+Ping statistics for 192.168.10.202:
+    Packets: Sent = 4, Received = 3, Lost = 1 (25% loss),
+Approximate round trip times in milli-seconds:
+    Minimum = 0ms, Maximum = 0ms, Average = 0ms
+
+C:\>ping 192.168.10.10
+
+Pinging 192.168.10.10 with 32 bytes of data:
+
+Reply from 192.168.10.10: bytes=32 time<1ms TTL=128
+Reply from 192.168.10.10: bytes=32 time<1ms TTL=128
+Reply from 192.168.10.10: bytes=32 time<1ms TTL=128
+Reply from 192.168.10.10: bytes=32 time<1ms TTL=128
+
+Ping statistics for 192.168.10.10:
+    Packets: Sent = 4, Received = 4, Lost = 0 (0% loss),
+Approximate round trip times in milli-seconds:
+    Minimum = 0ms, Maximum = 0ms, Average = 0ms
+
+C:\>ping 192.168.10.11
+
+Pinging 192.168.10.11 with 32 bytes of data:
+
+Reply from 192.168.10.11: bytes=32 time=2ms TTL=128
+Reply from 192.168.10.11: bytes=32 time=4ms TTL=128
+Reply from 192.168.10.11: bytes=32 time=4ms TTL=128
+Reply from 192.168.10.11: bytes=32 time=2ms TTL=128
+
+Ping statistics for 192.168.10.11:
+    Packets: Sent = 4, Received = 4, Lost = 0 (0% loss),
+Approximate round trip times in milli-seconds:
+    Minimum = 2ms, Maximum = 4ms, Average = 3ms
+
+C:\>ping 10.10.1.1
+
+Pinging 10.10.1.1 with 32 bytes of data:
+
+Reply from 10.10.1.1: bytes=32 time<1ms TTL=255
+Reply from 10.10.1.1: bytes=32 time<1ms TTL=255
+Reply from 10.10.1.1: bytes=32 time=3ms TTL=255
+Reply from 10.10.1.1: bytes=32 time<1ms TTL=255
+
+Ping statistics for 10.10.1.1:
+    Packets: Sent = 4, Received = 4, Lost = 0 (0% loss),
+Approximate round trip times in milli-seconds:
+    Minimum = 0ms, Maximum = 3ms, Average = 0ms
+```
+
+Далее все устройства пингуются нормально
+ 
 #### Вопрос для повторения
 
 - С точки зрения безопасности порта на S2, почему нет значения таймера для оставшегося возраста в минутах, когда было сконфигурировано динамическое обучение - sticky?
-Ответ:
+Ответ: Потому что стики подразумевает постоянное хранение, МАК-адрес  постоянно остается в записи.
 
 - Что касается безопасности порта на S2, если вы загружаете скрипт текущей конфигурации на S2, почему порту 18 на PC-B никогда не получит IP-адрес через DHCP?
-Ответ:
+Ответ: Так как сконфигурировано динамическое обучение - sticky, и если ПК будет иметь МАК отлиный от сохраненноо, то IP не пройдет. 
 
 - Что касается безопасности порта, в чем разница между типом абсолютного устаревания и типом устаревание по неактивности?
-Ответ:
+Ответ: В абсолютном удаляется МАК удаляется всегда по истечению заданного времени, а инактив удаляет только при неактивности оборудования.
 
