@@ -337,7 +337,6 @@ Neighbor ID     Pri   State           Dead Time   Address         Interface
 R2#show ip ospf ne
 R2#show ip ospf neighbor 
 
-
 Neighbor ID     Pri   State           Dead Time   Address         Interface
 1.1.1.1           1   FULL/DR         00:00:37    10.53.0.1       GigabitEthernet0/0/1
 ```
