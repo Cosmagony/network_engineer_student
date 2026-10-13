@@ -1841,7 +1841,353 @@ IP address       Client-ID/              Lease expiration        Type
 192.168.40.11    0001.636C.9C2B           --                     Automatic
 ```
 
-#### Шаг 6. Настройка
+#### Шаг 6. Настройка OSPF, безопасности портов и DHCP Snooping.
+
+```
+R1#conf t
+Enter configuration commands, one per line.  End with CNTL/Z.
+R1(config)#rout
+R1(config)#router os
+R1(config)#router ospf ?
+  <1-65535>  Process ID
+R1(config)#router ospf 1
+R1(config-router)#rou
+R1(config-router)#router-id 1.1.1.1
+R1(config-router)#net
+R1(config-router)#network 192.168.0.0 0.0.0.3 area 0
+R1(config-router)#network 192.168.0.4 0.0.0.3 area 0
+R1(config-router)# network 203.0.113.0 0.0.0.7 area 0
+R1(config-router)#def
+R1(config-router)#default-information ?
+  originate  Distribute a default route
+```
+
+```
+
+S1#show port-security interface f0/1
+Port Security              : Disabled
+Port Status                : Secure-down
+Violation Mode             : Shutdown
+Aging Time                 : 0 mins
+Aging Type                 : Absolute
+SecureStatic Address Aging : Disabled
+Maximum MAC Addresses      : 1
+Total MAC Addresses        : 0
+Configured MAC Addresses   : 0
+Sticky MAC Addresses       : 0
+Last Source Address:Vlan   : 0000.0000.0000:0
+S1(config)#int f0/1
+S1(config-if)#sw
+S1(config-if)#switchport p
+S1(config-if)#switchport po
+S1(config-if)#switchport port-security 
+S1(config-if)#switchport port-security m
+S1(config-if)#switchport port-security ma
+S1(config-if)#switchport port-security ?
+  aging        Port-security aging commands
+  mac-address  Secure mac address
+  maximum      Max secure addresses
+  violation    Security violation mode
+  <cr>
+S1(config-if)#switchport port-security max
+S1(config-if)#switchport port-security maximum 3
+S1(config-if)#sw
+S1(config-if)#switchport po
+S1(config-if)#switchport port-security v
+S1(config-if)#switchport port-security violation re
+S1(config-if)#switchport port-security violation restrict 
+S1(config-if)#sw
+S1(config-if)#switchport po
+S1(config-if)#switchport port-security ag
+S1(config-if)#switchport port-security aging t
+S1(config-if)#switchport port-security aging time 60
+S1(config-if)#exit
+S1(config)#int f0/2
+S1(config-if)#sw
+S1(config-if)#switchport po
+S1(config-if)#switchport port-security 
+S1(config-if)#sw
+S1(config-if)#switchport p
+S1(config-if)#switchport po
+S1(config-if)#switchport port-security ma
+S1(config-if)#switchport port-security max
+S1(config-if)#switchport port-security maximum 3
+S1(config-if)#sw
+S1(config-if)#switchport p
+S1(config-if)#switchport po
+S1(config-if)#switchport port-security v
+S1(config-if)#switchport port-security violation re
+S1(config-if)#switchport port-security violation restrict 
+S1(config-if)#sw
+S1(config-if)#switchport po
+S1(config-if)#switchport port-security a
+S1(config-if)#switchport port-security aging t
+S1(config-if)#switchport port-security aging time 60
+S1(config-if)#exit
+show port-security interface f0/1
+Port Security              : Enabled
+Port Status                : Secure-up
+Violation Mode             : Restrict
+Aging Time                 : 60 mins
+Aging Type                 : Absolute
+SecureStatic Address Aging : Disabled
+Maximum MAC Addresses      : 3
+Total MAC Addresses        : 0
+Configured MAC Addresses   : 0
+Sticky MAC Addresses       : 0
+Last Source Address:Vlan   : 0000.0000.0000:0
+Security Violation Count   : 0
+S1(config)#dhc
+S1(config)#ip dh
+S1(config)#ip dhcp sn
+S1(config)#ip dhcp snooping 
+S1(config)#ip dhcp snooping  vl
+S1(config)#ip dhcp snooping  vlan 10,20,99
+S1(config)#int f0/22
+S1(config-if)#ip dh
+S1(config-if)#ip dhcp sn
+S1(config-if)#ip dhcp snooping tr
+S1(config-if)#ip dhcp snooping trust 
+S1(config-if)#exit
+S1(config)#int f0/23
+S1(config-if)#ip dhcp snooping trust 
+S1(config-if)#exit
+S1(config)#int f0/1
+S1(config-if)#ip
+S1(config-if)#ip dh
+S1(config-if)#ip dhcp sn
+S1(config-if)#ip dhcp snooping l
+S1(config-if)#ip dhcp snooping limit r
+S1(config-if)#ip dhcp snooping limit rate 5
+S1(config-if)#exit
+S1(config)#int f0/2
+S1(config-if)#ip dhcp snooping limit rate 5
+S1(config-if)#exit
+
+```
+
+```
+S2(config)#int f0/1
+S2(config-if)#sw
+S2(config-if)#switchport po
+S2(config-if)#switchport port-security 
+S2(config-if)#sw
+S2(config-if)#switchport po
+S2(config-if)#switchport port-security max
+S2(config-if)#switchport port-security maximum 2
+S2(config-if)#sw
+S2(config-if)#switchport po
+S2(config-if)#switchport port-security mac
+S2(config-if)#switchport port-security mac-address st
+S2(config-if)#switchport port-security mac-address sticky 
+S2(config-if)#sw
+S2(config-if)#switchport po
+S2(config-if)#switchport port-security v
+S2(config-if)#switchport port-security violation pr
+S2(config-if)#switchport port-security violation protect 
+S2(config-if)#sw
+S2(config-if)#switchport po
+S2(config-if)#switchport port-security a
+S2(config-if)#switchport port-security aging t
+S2(config-if)#switchport port-security aging time 60
+S2(config-if)#exit
+S2(config)#ip dh
+S2(config)#ip dhcp sn
+S2(config)#ip dhcp snooping 
+S2(config)#ip dhcp snooping v
+S2(config)#ip dhcp snooping vl
+S2(config)#ip dhcp snooping vlan 10,20,99
+S2(config)#int f0/22
+S2(config-if)#ip dh
+S2(config-if)#ip dhcp sn
+S2(config-if)#ip dhcp snooping tr
+S2(config-if)#ip dhcp snooping trust 
+S2(config-if)#exit
+S2(config)#int f0/23
+S2(config-if)#ip dhcp snooping trust 
+S2(config-if)#exit
+S2(config)#int f0/23
+S2(config-if)#no ip dhcp snooping trust 
+S2(config-if)#exit
+S2(config)#int f0/24
+S2(config-if)#ip dhcp snooping trust 
+S2(config-if)#exit
+S2(config)#int f0/1
+S2(config-if)#ip dh
+S2(config-if)#ip dhcp sn
+S2(config-if)#ip dhcp snooping l
+S2(config-if)#ip dhcp snooping limit r
+S2(config-if)#ip dhcp snooping limit rate 5
+S2(config-if)#exit
+
+S2(config)#end
+S2#
+%SYS-5-CONFIG_I: Configured from console by console
+copy
+S2#copy r
+S2#copy running-config st
+S2#copy running-config startup-config 
+Destination filename [startup-config]? 
+Building configuration...
+[OK]
+
+
+```
+
+```
+S3(config)#int f0/1
+S3(config-if)#sw
+S3(config-if)#switchport po
+S3(config-if)#switchport port-security 
+S3(config-if)#sw
+S3(config-if)#switchport po
+S3(config-if)#switchport port-security max
+S3(config-if)#switchport port-security maximum 3
+S3(config-if)#sw
+S3(config-if)#switchport po
+S3(config-if)#switchport port-security v
+S3(config-if)#switchport port-security violation re
+S3(config-if)#switchport port-security violation restrict 
+S3(config-if)#sw
+S3(config-if)#switchport po
+S3(config-if)#switchport port-security ag
+S3(config-if)#switchport port-security aging t
+S3(config-if)#switchport port-security aging time 60
+S3(config-if)#exit
+S3(config)#ip d
+S3(config)#ip dh
+S3(config)#ip dhcp sn
+S3(config)#ip dhcp snooping 
+S3(config)#ip dhcp snooping  vl
+S3(config)#ip dhcp snooping  vlan 30,40,99
+S3(config)#int f0/1
+S3(config-if)#ip dh
+S3(config-if)#ip dhcp sn
+S3(config-if)#ip dhcp snooping l
+S3(config-if)#ip dhcp snooping limit r
+S3(config-if)#ip dhcp snooping limit rate 5
+S3(config-if)#exit
+S3(config)#int f0/24
+S3(config-if)#ip dh
+S3(config-if)#ip dhcp sn
+S3(config-if)#ip dhcp snooping tr
+S3(config-if)#ip dhcp snooping trust 
+S3(config-if)#exit
+S3(config)#int f0/22
+S3(config-if)#ip dhcp snooping trust 
+S3(config-if)#exit
+S3(config)#end
+S3#
+%SYS-5-CONFIG_I: Configured from console by console
+cop
+S3#copy r
+S3#copy running-config st
+S3#copy running-config startup-config 
+Destination filename [startup-config]? 
+Building configuration...
+[OK]
+S3(config)#end
+S3#
+%SYS-5-CONFIG_I: Configured from console by console
+cop
+S3#copy r
+S3#copy running-config s
+S3#copy running-config st
+S3#copy running-config startup-config 
+Destination filename [startup-config]? 
+Building configuration...
+[OK]
+```
+
+```
+S4#conf t
+Enter configuration commands, one per line.  End with CNTL/Z.
+S4(config)#int f0/1
+S4(config-if)#sw
+S4(config-if)#switchport po
+S4(config-if)#switchport port-security 
+S4(config-if)#sw
+S4(config-if)#switchport po
+S4(config-if)#switchport port-security max
+S4(config-if)#switchport port-security maximum 3
+S4(config-if)#sw
+S4(config-if)#switchport po
+S4(config-if)#switchport port-security v
+S4(config-if)#switchport port-security violation re
+S4(config-if)#switchport port-security violation restrict 
+S4(config-if)#sw
+S4(config-if)#switchport po
+S4(config-if)#switchport port-security a
+S4(config-if)#switchport port-security aging t
+S4(config-if)#switchport port-security aging time 60
+S4(config-if)#exit
+S4(config)#int f0/2
+S4(config-if)#sw
+S4(config-if)#switchport po
+S4(config-if)#switchport port-security 
+S4(config-if)#sw
+S4(config-if)#switchport po
+S4(config-if)#switchport port-security max
+S4(config-if)#switchport port-security maximum 3
+S4(config-if)#sw
+S4(config-if)#switchport po
+S4(config-if)#switchport port-security v
+S4(config-if)#switchport port-security violation re
+S4(config-if)#switchport port-security violation restrict 
+S4(config-if)#sw
+S4(config-if)#switchport po
+S4(config-if)#switchport port-security ag
+S4(config-if)#switchport port-security aging t
+S4(config-if)#switchport port-security aging time 60
+S4(config-if)#end cop
+S4(config-if)#exit
+S4(config)#ip dh
+S4(config)#ip dhcp sn
+S4(config)#ip dhcp snooping vl
+S4(config)#ip dhcp snooping vlan 30,40,99
+S4(config)#int f0/22
+S4(config-if)#ip dh
+S4(config-if)#ip dhcp sn
+S4(config-if)#ip dhcp snooping tr
+S4(config-if)#ip dhcp snooping trust 
+S4(config-if)#exit
+S4(config)#int f0/23
+S4(config-if)#ip dhcp snooping trust 
+S4(config-if)#exit
+S4(config)#int f0/1
+S4(config-if)#ip dh
+S4(config-if)#ip dhcp sn
+S4(config-if)#ip dhcp snooping l
+S4(config-if)#ip dhcp snooping limit r
+S4(config-if)#ip dhcp snooping limit rate 5
+S4(config-if)#exit
+S4(config)#int f0/2
+S4(config-if)#ip dhcp snooping limit rate 5
+S4(config-if)#end cop
+S4(config-if)#end 
+S4#
+%SYS-5-CONFIG_I: Configured from console by console
+co[p
+S4#cop
+S4#copy r
+S4#copy running-config c
+S4#copy running-config co
+S4#copy running-config st
+S4#copy running-config startup-config 
+Destination filename [startup-config]? 
+Building configuration...
+[OK]
+```
+
+```
+
+```
+
+
+
+
+
+#### Шаг 7. Настройка OSPF и безопасности портов.
 
 ```
 
@@ -1854,4 +2200,68 @@ IP address       Client-ID/              Lease expiration        Type
 ```
 
 ```
+
+
+```
+
+```
+
+
+```
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
