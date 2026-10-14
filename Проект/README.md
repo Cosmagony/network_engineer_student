@@ -1,4 +1,4 @@
-# Proekt_Построение сети с нуля между зданиями Пулковской обсерватории
+# Proekt_Построение масштабируемой двухуровневой сети с нуля в здании Пулковской обсерватории.
 
 Работа выполнена на ПК с установленным Cisco Packet Tracer.
 
@@ -1841,7 +1841,7 @@ IP address       Client-ID/              Lease expiration        Type
 192.168.40.11    0001.636C.9C2B           --                     Automatic
 ```
 
-#### Шаг 6. Настройка OSPF, безопасности портов и DHCP Snooping.
+#### Шаг 6. Настройка OSPFv2, безопасности портов и DHCP Snooping.
 
 ```
 R1#conf t
@@ -1958,7 +1958,7 @@ S1(config-if)#ip dh
 S1(config-if)#ip dhcp sn
 S1(config-if)#ip dhcp snooping l
 S1(config-if)#ip dhcp snooping limit r
-S1(config-if)#ip dhcp snooping limit rate 5
+S1(config-if)#ip dhcp snooping limit rate 20
 S1(config-if)#exit
 S1(config)#int f0/2
 S1(config-if)#ip dhcp snooping limit rate 5
@@ -2179,46 +2179,1581 @@ Building configuration...
 [OK]
 ```
 
+Отсутствует пинг от ПК-А до маршрутизатора, зотя должен быть. Ищу ошибку. 
+
+```
+MS1#show run | section router ospf
+MS1#
+```
+
+Не настроила OSFP на MS1 MS2.
+
+```
+MS1(config)#
+MS1(config)#router ospf 1
+MS1(config-router)#rou
+MS1(config-router)#router-id 192.168.99.2
+MS1(config-router)#net
+MS1(config-router)#network 192.168.0.0 0.0.0.3 area 0
+MS1(config-router)#
+14:43:36: %OSPF-5-ADJCHG: Process 1, Nbr 1.1.1.1 on GigabitEthernet0/1 from LOADING to FULL, Loading Done
+
+MS1(config-router)#network 192.168.10.0 0.0.0.255 area 0
+MS1(config-router)#network 192.168.20.0 0.0.0.255 area 0
+MS1(config-router)#network 192.168.99.0 0.0.0.31 area 0
+MS1(config-router)#exit
+MS1(config)#exit
+MS1#
+%SYS-5-CONFIG_I: Configured from console by console
+show run | section router ospf
+router ospf 1
+ router-id 192.168.99.2
+ log-adjacency-changes
+ network 192.168.0.0 0.0.0.3 area 0
+ network 192.168.10.0 0.0.0.255 area 0
+ network 192.168.20.0 0.0.0.255 area 0
+ network 192.168.99.0 0.0.0.31 area 0
 ```
 
 ```
+MS2(config)#rou
+MS2(config)#router os
+MS2(config)#router ospf 1
+MS2(config-router)#ro
+MS2(config-router)#router-id 192.168.99.3
+MS2(config-router)#ne
+MS2(config-router)#net
+MS2(config-router)#network 192.168.0.0 0.0.0.3 area 0
+MS2(config-router)#network 192.168.30.0 0.0.0.255 area 0
+MS2(config-router)#network 192.168.40.0 0.0.0.255 area 0
+MS2(config-router)#network 192.168.99.0 0.0.0.31 area 0
+MS2(config-router)#
+MS2(config-router)#exit
+MS2(config)#end
+MS2#
+%SYS-5-CONFIG_I: Configured from console by console
+show run | section router ospf
+router-id 192.168.99.2
+log-adjacency-changes
+MS2(config-router)#net
+MS2(config-router)#network network 192.168.0.4 0.0.0.3 area 0
+                           ^
+% Invalid input detected at '^' marker.
+	
+MS2(config-router)#network 192.168.0.4 0.0.0.3 area 0
+MS2(config-router)#network 192.168.30.0 0.0.0.255 area 0
+MS2(config-router)#
+14:51:36: %OSPF-5-ADJCHG: Process 1, Nbr 1.1.1.1 on GigabitEthernet0/1 from LOADING to FULL, Loading Done
+network 192.168.40.0 0.0.0.255 area 0
+MS2(config-router)#network 192.168.99.0 0.0.0.31 area 0
+MS2(config-router)#end
+MS2#cop
+MS2#copy r
+MS2#copy running-config st
+MS2#copy running-config startup-config 
+Destination filename [startup-config]? 
+Building configuration...
+[OK]
+```
+
+Проверяю еще раз пинг
+
+```
+C:\>ping 203.0.113.1
+
+Pinging 203.0.113.1 with 32 bytes of data:
+
+Reply from 203.0.113.1: bytes=32 time<1ms TTL=254
+Reply from 203.0.113.1: bytes=32 time<1ms TTL=254
+Reply from 203.0.113.1: bytes=32 time<1ms TTL=254
+Reply from 203.0.113.1: bytes=32 time<1ms TTL=254
+
+Ping statistics for 203.0.113.1:
+    Packets: Sent = 4, Received = 4, Lost = 0 (0% loss),
+Approximate round trip times in milli-seconds:
+    Minimum = 0ms, Maximum = 0ms, Average = 0ms
+```
+
+ПК с правой стороны тоже всё хорошо.
+
+PC-F
+```
+C:\>ping 203.0.113.1
+
+Pinging 203.0.113.1 with 32 bytes of data:
+
+Reply from 203.0.113.1: bytes=32 time<1ms TTL=254
+Reply from 203.0.113.1: bytes=32 time<1ms TTL=254
+Reply from 203.0.113.1: bytes=32 time<1ms TTL=254
+Reply from 203.0.113.1: bytes=32 time<1ms TTL=254
+```
+
+PC-D
+```
+C:\>ping 192.168.0.1
+
+Pinging 192.168.0.1 with 32 bytes of data:
+
+Reply from 192.168.0.1: bytes=32 time<1ms TTL=254
+Reply from 192.168.0.1: bytes=32 time<1ms TTL=254
+Reply from 192.168.0.1: bytes=32 time<1ms TTL=254
+Reply from 192.168.0.1: bytes=32 time<1ms TTL=254
+```
+
+Также обнаружила, что интерфейс f0/2 на S1 находиться в 10 подсети, хотя должен быть в 20. Исправляю.
+
+```
+S1(config)#int f0/2
+S1(config-if)#sw
+S1(config-if)#switchport m
+S1(config-if)#switchport mode a
+S1(config-if)#switchport mode access 
+S1(config-if)#sw
+S1(config-if)#switchport a
+S1(config-if)#switchport access vlan 20
+S1(config-if)#no sh
+S1(config-if)#no shutdown 
+S1(config-if)#
+S1(config-if)#end
+S1#
+%SYS-5-CONFIG_I: Configured from console by console
+show vlan brief
+
+VLAN Name                             Status    Ports
+---- -------------------------------- --------- -------------------------------
+1    default                          active    Gig0/1, Gig0/2
+10   VIP_USER                         active    Fa0/1
+20   USER                             active    Fa0/2
+99   MANAGEMENT                       active    
+999  PARKING                          active    Fa0/3, Fa0/4, Fa0/5, Fa0/6
+                                                Fa0/7, Fa0/8, Fa0/9, Fa0/10
+                                                Fa0/11, Fa0/12, Fa0/13, Fa0/14
+                                                Fa0/15, Fa0/16, Fa0/17, Fa0/18
+                                                Fa0/19, Fa0/20, Fa0/21, Fa0/24
+1000 NATIVE                           active    
+1002 fddi-default                     active    
+1003 token-ring-default               active    
+1004 fddinet-default                  active    
+1005 trnet-default                    active    
+S1#
+```
+
+#### Шаг 7. Настройка оступа к сетевым устройствам по протоколу SSH
+
+```
+R1>en
+Password: 
+R1#conf t
+Enter configuration commands, one per line.  End with CNTL/Z.
+R1(config)#ip do
+R1(config)#ip dom
+R1(config)#ip domain-n
+R1(config)#ip domain-name otus-cosmos.ru
+R1(config)#use
+R1(config)#username admin secret class123
+R1(config)#
+R1(config)#cr
+R1(config)#crypto k
+R1(config)#crypto key g
+R1(config)#crypto key generate ?
+  rsa  Generate RSA keys
+R1(config)#crypto key generate rs
+R1(config)#crypto key generate rsa ?
+  general-keys  Generate a general purpose RSA key pair for signing and
+                encryption
+  <cr>
+R1(config)#crypto key generate rsa g
+R1(config)#crypto key generate rsa general-keys ?
+  modulus  Provide number of modulus bits on the command line
+  <cr>
+R1(config)#crypto key generate rsa general-keys m
+R1(config)#crypto key generate rsa general-keys modulus 1024
+The name for the keys will be: R1.otus-cosmos.ru
+
+% The key modulus size is 1024 bits
+% Generating 1024 bit RSA keys, keys will be non-exportable...[OK]
+*Mar 1 1:34:45.531: %SSH-5-ENABLED: SSH 1.99 has been enabled
+R1(config)#ip sh
+R1(config)#ip ss
+R1(config)#ip ssh v
+R1(config)#ip ssh version ?
+  <1-2>  Protocol version
+R1(config)#ip ssh version 2
+R1(config)#li
+R1(config)#lin
+R1(config)#line v
+R1(config)#line vty 0 15 
+R1(config-line)#tr
+R1(config-line)#transport in
+R1(config-line)#transport input ss
+R1(config-line)#transport input ssh 
+R1(config-line)#login lo
+R1(config-line)#login local 
+R1(config-line)#end
+R1#
+%SYS-5-CONFIG_I: Configured from console by console
+wr m
+Building configuration...
+[OK]
+```
+
+![alt text](image-8.png)
+
+![alt text](image-7.png)
+
+
+```
+MS1>en
+Password: 
+MS1#conf t
+Enter configuration commands, one per line.  End with CNTL/Z.
+MS1(config)#ip domain-name otus-cosmos.ru
+MS1(config)#username admin secret class123
+MS1(config)#crypto key generate rsa general-keys modulus 1024
+The name for the keys will be: MS1.otus-cosmos.ru
+
+% The key modulus size is 1024 bits
+% Generating 1024 bit RSA keys, keys will be non-exportable...[OK]
+*Mar 1 1:40:14.660: %SSH-5-ENABLED: SSH 1.99 has been enabled
+MS1(config)#ip ssh
+MS1(config)#ip ssh v
+MS1(config)#ip ssh version 2
+MS1(config)#li
+MS1(config)#line v
+MS1(config)#line vty 0 15
+MS1(config-line)#tr
+MS1(config-line)#transport IN
+MS1(config-line)#transport INput SSH
+MS1(config-line)#lo
+MS1(config-line)#log
+MS1(config-line)#login local
+MS1(config-line)#login local 
+MS1(config-line)#end
+MS1#
+%SYS-5-CONFIG_I: Configured from console by console
+wr m
+Building configuration...
+[OK]
+```
+
+```
+MS2>en
+Password: 
+MS2#conf t
+Enter configuration commands, one per line.  End with CNTL/Z.
+MS2(config)#ip domain-name otus-cosmos.ru
+MS2(config)#username admin secret class123
+MS2(config)#
+MS2(config)#MS1(config)#
+             ^
+% Invalid input detected at '^' marker.
+	
+MS2(config)#
+MS2(config)#crypto key generate rsa general-keys modulus 1024
+The name for the keys will be: MS2.otus-cosmos.ru
+
+% The key modulus size is 1024 bits
+% Generating 1024 bit RSA keys, keys will be non-exportable...[OK]
+*Mar 1 1:42:9.613: %SSH-5-ENABLED: SSH 1.99 has been enabled
+MS2(config)#ip ssh v
+MS2(config)#ip ssh version 2
+MS2(config)#lin
+MS2(config)#line vt
+MS2(config)#line vty 0 15
+MS2(config-line)#tr
+MS2(config-line)#transport in
+MS2(config-line)#transport input ssh
+MS2(config-line)#login local
+MS2(config-line)#end
+MS2#
+%SYS-5-CONFIG_I: Configured from console by console
+wr m
+Building configuration...
+[OK]
+```
+
+```
+S1#conf t
+Enter configuration commands, one per line.  End with CNTL/Z.
+S1(config)#ip domain-name otus-cosmos.ru
+S1(config)#username admin secret class123
+S1(config)#
+S1(config)#crypto key generate rsa general-keys modulus 1024
+The name for the keys will be: S1.otus-cosmos.ru
+
+% The key modulus size is 1024 bits
+% Generating 1024 bit RSA keys, keys will be non-exportable...[OK]
+*Mar 1 1:44:50.779: %SSH-5-ENABLED: SSH 1.99 has been enabled
+S1(config)#ip shh v
+S1(config)#ip shh ver
+S1(config)#ip ssh ver
+S1(config)#ip ssh version 2
+S1(config)#lin
+S1(config)#line vt
+S1(config)#line vty 0 15
+S1(config-line)#tra
+S1(config-line)#transport in
+S1(config-line)#transport input ssh
+S1(config-line)#login local
+S1(config-line)#end
+S1#
+%SYS-5-CONFIG_I: Configured from console by console
+wr m
+Building configuration...
+[OK]
+S1#
+```
+
+```
+S2#conf t
+Enter configuration commands, one per line.  End with CNTL/Z.
+S2(config)#ip domain-name otus-cosmos.ru
+S2(config)#username admin secret class123
+S2(config)#crypto key generate rsa general-keys modulus 1024
+The name for the keys will be: S2.otus-cosmos.ru
+
+% The key modulus size is 1024 bits
+% Generating 1024 bit RSA keys, keys will be non-exportable...[OK]
+*Mar 1 1:46:4.395: %SSH-5-ENABLED: SSH 1.99 has been enabled
+S2(config)#ip ssh v
+S2(config)#ip ssh version 2
+S2(config)#lin
+S2(config)#line v
+S2(config)#line vty 0 15
+S2(config-line)#tr
+S2(config-line)#transport in
+S2(config-line)#transport input ssh
+S2(config-line)#login local
+S2(config-line)#end
+S2#
+%SYS-5-CONFIG_I: Configured from console by console
+wr m
+Building configuration...
+[OK]
+S2#
+```
+
+```
+S3#conf t
+Enter configuration commands, one per line.  End with CNTL/Z.
+S3(config)#ip domain-name otus-cosmos.ru
+S3(config)#
+S3(config)#username admin secret class123
+S3(config)#
+S3(config)#crypto key generate rsa general-keys modulus 1024
+The name for the keys will be: S3.otus-cosmos.ru
+
+% The key modulus size is 1024 bits
+% Generating 1024 bit RSA keys, keys will be non-exportable...[OK]
+*Mar 1 1:46:58.145: %SSH-5-ENABLED: SSH 1.99 has been enabled
+S3(config)#ip ssh v
+S3(config)#ip ssh version 2
+S3(config)#li
+S3(config)#line vt
+S3(config)#line vty 0 15
+S3(config-line)#tr
+S3(config-line)#transport in
+S3(config-line)#transport input ssh
+S3(config-line)#login local
+S3(config-line)#end
+S3#
+%SYS-5-CONFIG_I: Configured from console by console
+wr m
+Building configuration...
+[OK]
+```
+
+```
+S4>en
+Password: 
+S4#conf t
+Enter configuration commands, one per line.  End with CNTL/Z.
+S4(config)#ip domain-name otus-cosmos.ru
+S4(config)#
+S4(config)#username admin secret class123
+S4(config)#
+S4(config)#crypto key generate rsa general-keys modulus 1024
+The name for the keys will be: S4.otus-cosmos.ru
+
+% The key modulus size is 1024 bits
+% Generating 1024 bit RSA keys, keys will be non-exportable...[OK]
+*Mar 1 1:48:3.641: %SSH-5-ENABLED: SSH 1.99 has been enabled
+S4(config)#ip ss
+S4(config)#ip ssh v
+S4(config)#ip ssh version 2
+S4(config)#lin
+S4(config)#line vt
+S4(config)#line vty 0 15
+S4(config-line)#tra
+S4(config-line)#transport i
+S4(config-line)#transport input ssh
+S4(config-line)#login local
+S4(config-line)#end
+S4#
+%SYS-5-CONFIG_I: Configured from console by console
+wr m
+Building configuration...
+[OK]
+```
+
+![alt text](image-10.png)
+
+![alt text](image-9.png)
+
+#### Шаг 7. Настройка STP и EtherChannel
+
+Решила сделать резервирование, теоретически можно разнести коммутаторы на два разных здания, но понадобится использовать оптику из=за дальностей.
+
+![alt text](image-11.png)
+
+```
+MS1(config)#int f0/2
+MS1(config-if)#de
+MS1(config-if)#des
+MS1(config-if)#description TO_MS2
+MS1(config-if)#no sw`
+MS1(config-if)#no sw
+MS1(config-if)#no switchport 
+MS1(config-if)#ip add
+MS1(config-if)#ip address 192.168.0.9 255.255.255.252
+MS1(config-if)#no sh
+MS1(config-if)#no shutdown 
+MS1(config-if)#exit
+MS1(config)#
+MS1(config)# int ra f0/15,g0/2,f0/20
+MS1(config-if-range)#no sw
+MS1(config-if-range)#no switchport a
+MS1(config-if-range)#no switchport access vl
+MS1(config-if-range)#no switchport access vlan 999
+MS1(config-if-range)#no sw
+MS1(config-if-range)#no switchport m
+MS1(config-if-range)#no switchport mode ac
+MS1(config-if-range)#no switchport mode ac
+MS1(config-if-range)#no switchport mode acc
+MS1(config-if-range)#no switchport mode acc
+MS1(config-if-range)#no switchport mode access
+MS1(config-if-range)#no switchport mode access
+Command rejected: An interface must be configured to the Access or Trunk	modes to be configured to NoNegotiate.
+Command rejected: An interface must be configured to the Access or Trunk	modes to be configured to NoNegotiate.
+Command rejected: An interface must be configured to the Access or Trunk	modes to be configured to NoNegotiate.
+MS1(config-if-range)#no sh
+MS1(config-if-range)#no shutdown 
+
+%LINK-5-CHANGED: Interface FastEthernet0/15, changed state to down
+
+%LINK-5-CHANGED: Interface GigabitEthernet0/2, changed state to down
+
+%LINK-5-CHANGED: Interface FastEthernet0/20, changed state to down
+MS1(config-if-range)#exit
+MS1(config)#
+%LINK-5-CHANGED: Interface GigabitEthernet0/2, changed state to up
+
+%LINEPROTO-5-UPDOWN: Line protocol on Interface GigabitEthernet0/2, changed state to up
+onfig)#int ra f0/15, f0/23
+MS1(config-if-range)#no sw
+MS1(config-if-range)#no switchport a
+MS1(config-if-range)#des
+MS1(config-if-range)#description ECH_S1
+MS1(config-if-range)#sw
+MS1(config-if-range)#switchport tr
+MS1(config-if-range)#switchport trunk en
+MS1(config-if-range)#switchport trunk encapsulation d
+MS1(config-if-range)#switchport trunk encapsulation dot1q 
+MS1(config-if-range)#sw
+MS1(config-if-range)#switchport m
+MS1(config-if-range)#switchport mode t
+MS1(config-if-range)#switchport mode trunk 
+
+MS1(config-if-range)#
+%LINEPROTO-5-UPDOWN: Line protocol on Interface FastEthernet0/15, changed state to down
+
+%LINEPROTO-5-UPDOWN: Line protocol on Interface FastEthernet0/15, changed state to up
+
+%LINEPROTO-5-UPDOWN: Line protocol on Interface Vlan999, changed state to up
+sw
+MS1(config-if-range)#switchport tr
+MS1(config-if-range)#switchport trunk n
+MS1(config-if-range)#switchport trunk native vlan 1000
+MS1(config-if-range)#
+%CDP-4-NATIVE_VLAN_MISMATCH: Native VLAN mismatch discovered on FastEthernet0/15 (1000), with S1 FastEthernet0/16 (1).
+sw
+MS1(config-if-range)#switchport tr
+MS1(config-if-range)#switchport trunk al
+MS1(config-if-range)#switchport trunk allowed vl
+MS1(config-if-range)#switchport trunk allowed vlan 
+MS1(config-if-range)#switchport trunk allowed vlan 10,20,99,1000
+MS1(config-if-range)#ch
+MS1(config-if-range)#chgr
+MS1(config-if-range)#chan
+MS1(config-if-range)#channel-g
+MS1(config-if-range)#channel-group 1 mo
+MS1(config-if-range)#channel-group 1 mode ac
+MS1(config-if-range)#channel-group 1 mode active 
+MS1(config-if-range)#
+Creating a port-channel interface Port-channel 1
+
+%LINEPROTO-5-UPDOWN: Line protocol on Interface FastEthernet0/15, changed state to down
+
+%EC-5-CANNOT_BUNDLE2: Fa0/15 is not compatible with Po1 and will be suspended (vlan mask is different)
+
+%LINEPROTO-5-UPDOWN: Line protocol on Interface FastEthernet0/23, changed state to down
+
+%EC-5-CANNOT_BUNDLE2: Fa0/23 is not compatible with Po1 and will be suspended (vlan mask is different)
+exit
+MS1(config)#int port-ch
+MS1(config)#int port-channel 1
+MS1(config-if)#des
+MS1(config-if)#description ECH_S1
+MS1(config-if)#sw
+MS1(config-if)#switchport tr
+MS1(config-if)#switchport trunk en
+MS1(config-if)#switchport trunk encapsulation d
+MS1(config-if)#switchport trunk encapsulation dot1q 
+MS1(config-if)#sw
+MS1(config-if)#switchport m
+MS1(config-if)#switchport mode tr
+MS1(config-if)#switchport mode trunk 
+MS1(config-if)#sw
+MS1(config-if)#switchport tr
+MS1(config-if)#switchport trunk n
+MS1(config-if)#switchport trunk native vl
+MS1(config-if)#switchport trunk native vlan 1000
+MS1(config-if)#sw
+MS1(config-if)#switchport tr
+MS1(config-if)#switchport trunk al
+MS1(config-if)#switchport trunk allowed v
+MS1(config-if)#switchport trunk allowed vlan 10,20,99,1000
+MS1(config-if)#end
+MS1#
+%SYS-5-CONFIG_I: Configured from console by console
+wr m
+Building configuration...
+[OK]
+MS1(config)#int ra f0/20, f0/24
+MS1(config-if-range)#des
+MS1(config-if-range)#description ECH_TOS2
+MS1(config-if-range)#sw
+MS1(config-if-range)#switchport tr
+MS1(config-if-range)#switchport trunk en
+MS1(config-if-range)#switchport trunk encapsulation d
+MS1(config-if-range)#switchport trunk encapsulation dot1q 
+MS1(config-if-range)#sw
+MS1(config-if-range)#switchport m
+MS1(config-if-range)#switchport mode tr
+MS1(config-if-range)#switchport mode trunk 
+
+MS1(config-if-range)#
+%LINEPROTO-5-UPDOWN: Line protocol on Interface FastEthernet0/20, changed state to down
+
+%LINEPROTO-5-UPDOWN: Line protocol on Interface FastEthernet0/20, changed state to up
+sw
+MS1(config-if-range)#switchport tr
+MS1(config-if-range)#switchport trunk na
+MS1(config-if-range)#switchport trunk native 1000
+                                             ^
+% Invalid input detected at '^' marker.
+	
+MS1(config-if-range)#sw
+MS1(config-if-range)#switchport tr
+MS1(config-if-range)#switchport trunk al
+MS1(config-if-range)#switchport trunk allowed vl
+MS1(config-if-range)#switchport trunk allowed vlan 10,20,99,1000
+MS1(config-if-range)#channel-gr
+MS1(config-if-range)#channel-group 1 m
+MS1(config-if-range)#channel-group 1 mode ac
+MS1(config-if-range)#channel-group 1 mode active 
+MS1(config-if-range)#
+%LINEPROTO-5-UPDOWN: Line protocol on Interface FastEthernet0/20, changed state to down
+
+%EC-5-CANNOT_BUNDLE2: Fa0/20 is not compatible with Po1 and will be suspended  (native vlan of Fa0/20 is 1, Po1 id 1000)
+
+%LINEPROTO-5-UPDOWN: Line protocol on Interface FastEthernet0/24, changed state to down
+
+%LINEPROTO-5-UPDOWN: Line protocol on Interface Vlan10, changed state to down
+
+%LINEPROTO-5-UPDOWN: Line protocol on Interface Vlan20, changed state to down
+
+%LINEPROTO-5-UPDOWN: Line protocol on Interface Vlan99, changed state to down
+
+%LINEPROTO-5-UPDOWN: Line protocol on Interface FastEthernet0/24, changed state to up
+
+%LINEPROTO-5-UPDOWN: Line protocol on Interface Vlan10, changed state to up
+
+%LINEPROTO-5-UPDOWN: Line protocol on Interface Vlan20, changed state to up
+
+%LINEPROTO-5-UPDOWN: Line protocol on Interface Vlan99, changed state to up
+
+%LINEPROTO-5-UPDOWN: Line protocol on Interface FastEthernet0/15, changed state to up
+
+%LINEPROTO-5-UPDOWN: Line protocol on Interface FastEthernet0/23, changed state to up
+
+%LINEPROTO-5-UPDOWN: Line protocol on Interface FastEthernet0/20, changed state to up
+
+%CDP-4-NATIVE_VLAN_MISMATCH: Native VLAN mismatch discovered on FastEthernet0/15 (1000), with S1 FastEthernet0/16 (1).
+exit
+MS1(config)#int port
+MS1(config)#int port-channel 1
+MS1(config-if)#des
+MS1(config-if)#description ECH_TOS2
+MS1(config-if)#sw
+MS1(config-if)#switchport tr
+MS1(config-if)#switchport trunk en
+MS1(config-if)#switchport trunk encapsulation d
+MS1(config-if)#switchport trunk encapsulation dot1q 
+MS1(config-if)#sw
+MS1(config-if)#switchport m
+MS1(config-if)#switchport mode tr
+MS1(config-if)#switchport mode trunk 
+MS1(config-if)#sw
+MS1(config-if)#switchport 
+%HSRP-6-STATECHANGE: Vlan99 Grp 99 state Speak -> Standby
+
+%HSRP-6-STATECHANGE: Vlan99 Grp 99 state Standby -> Active
+tr
+MS1(config-if)#switchport trunk n
+MS1(config-if)#switchport trunk native vl
+MS1(config-if)#switchport trunk native vlan 1000
+MS1(config-if)#sw
+MS1(config-if)#switchport tr
+MS1(config-if)#switchport trunk al
+MS1(config-if)#switchport trunk allowed v
+MS1(config-if)#switchport trunk allowed vlan 10,20,99,1000
+MS1(config-if)#end wr m
+                ^
+% Invalid input detected at '^' marker.
+	
+MS1(config-if)#en
+% Ambiguous command: "en"
+MS1(config)#end
+MS1#
+%SYS-5-CONFIG_I: Configured from console by console
+wr m
+Building configuration...
+[OK]
+MS1#
+%CDP-4-NATIVE_VLAN_MISMATCH: Native VLAN mismatch discovered on FastEthernet0/15 (1000), with S1 Fas
 
 
 
+%LINK-5-CHANGED: Interface FastEthernet0/20, changed state to down
+
+%LINK-5-CHANGED: Interface FastEthernet0/15, changed state to down
+MS2(config-if-range)#
+%LINK-5-CHANGED: Interface GigabitEthernet0/2, changed state to up
+
+%LINEPROTO-5-UPDOWN: Line protocol on Interface GigabitEthernet0/2, changed state to up
+
+MS1(config)#int ra f0/20, f0/24
+MS1(config-if-range)#des
+MS1(config-if-range)#description ECH_TOS2
+MS1(config-if-range)#sw
+MS1(config-if-range)#switchport tr
+MS1(config-if-range)#switchport trunk en
+MS1(config-if-range)#switchport trunk encapsulation d
+MS1(config-if-range)#switchport trunk encapsulation dot1q 
+MS1(config-if-range)#sw
+MS1(config-if-range)#switchport m
+MS1(config-if-range)#switchport mode tr
+MS1(config-if-range)#switchport mode trunk 
+
+MS1(config-if-range)#
+%LINEPROTO-5-UPDOWN: Line protocol on Interface FastEthernet0/20, changed state to down
+
+%LINEPROTO-5-UPDOWN: Line protocol on Interface FastEthernet0/20, changed state to up
+sw
+MS1(config-if-range)#switchport tr
+MS1(config-if-range)#switchport trunk na
+MS1(config-if-range)#switchport trunk native 1000
+                                             ^
+% Invalid input detected at '^' marker.
+	
+MS1(config-if-range)#sw
+MS1(config-if-range)#switchport tr
+MS1(config-if-range)#switchport trunk al
+MS1(config-if-range)#switchport trunk allowed vl
+MS1(config-if-range)#switchport trunk allowed vlan 10,20,99,1000
+MS1(config-if-range)#channel-gr
+MS1(config-if-range)#channel-group 1 m
+MS1(config-if-range)#channel-group 1 mode ac
+MS1(config-if-range)#channel-group 1 mode active 
+MS1(config-if-range)#
+%LINEPROTO-5-UPDOWN: Line protocol on Interface FastEthernet0/20, changed state to down
+
+%EC-5-CANNOT_BUNDLE2: Fa0/20 is not compatible with Po1 and will be suspended  (native vlan of Fa0/20 is 1, Po1 id 1000)
+
+%LINEPROTO-5-UPDOWN: Line protocol on Interface FastEthernet0/24, changed state to down
+
+%LINEPROTO-5-UPDOWN: Line protocol on Interface Vlan10, changed state to down
+
+%LINEPROTO-5-UPDOWN: Line protocol on Interface Vlan20, changed state to down
+
+%LINEPROTO-5-UPDOWN: Line protocol on Interface Vlan99, changed state to down
+
+%LINEPROTO-5-UPDOWN: Line protocol on Interface FastEthernet0/24, changed state to up
+
+%LINEPROTO-5-UPDOWN: Line protocol on Interface Vlan10, changed state to up
+
+%LINEPROTO-5-UPDOWN: Line protocol on Interface Vlan20, changed state to up
+
+%LINEPROTO-5-UPDOWN: Line protocol on Interface Vlan99, changed state to up
+
+%LINEPROTO-5-UPDOWN: Line protocol on Interface FastEthernet0/15, changed state to up
+
+%LINEPROTO-5-UPDOWN: Line protocol on Interface FastEthernet0/23, changed state to up
+
+%LINEPROTO-5-UPDOWN: Line protocol on Interface FastEthernet0/20, changed state to up
+
+%CDP-4-NATIVE_VLAN_MISMATCH: Native VLAN mismatch discovered on FastEthernet0/15 (1000), with S1 FastEthernet0/16 (1).
+exit
+MS1(config)#int port
+MS1(config)#int port-channel 1
+MS1(config-if)#des
+MS1(config-if)#description ECH_TOS2
+MS1(config-if)#sw
+MS1(config-if)#switchport tr
+MS1(config-if)#switchport trunk en
+MS1(config-if)#switchport trunk encapsulation d
+MS1(config-if)#switchport trunk encapsulation dot1q 
+MS1(config-if)#sw
+MS1(config-if)#switchport m
+MS1(config-if)#switchport mode tr
+MS1(config-if)#switchport mode trunk 
+MS1(config-if)#sw
+MS1(config-if)#switchport 
+%HSRP-6-STATECHANGE: Vlan99 Grp 99 state Speak -> Standby
+
+%HSRP-6-STATECHANGE: Vlan99 Grp 99 state Standby -> Active
+tr
+MS1(config-if)#switchport trunk n
+MS1(config-if)#switchport trunk native vl
+MS1(config-if)#switchport trunk native vlan 1000
+MS1(config-if)#sw
+MS1(config-if)#switchport tr
+MS1(config-if)#switchport trunk al
+MS1(config-if)#switchport trunk allowed v
+MS1(config-if)#switchport trunk allowed vlan 10,20,99,1000
+MS1(config-if)#end wr m
 
 
-#### Шаг 7. Настройка OSPF и безопасности портов.
+MS1(config)#sp
+MS1(config)#spanning-tree vl
+MS1(config)#spanning-tree vlan 10,20
+%CDP-4-NATIVE_VLAN_MISMATCH: Native VLAN mismatch discovered on FastEthernet0/15 (1000), with S1 FastEthernet0/16 (1).
+,99 r
+MS1(config)#spanning-tree vlan 10,20,99 root p
+MS1(config)#spanning-tree vlan 10,20,99 root primary 
 
 ```
 
 ```
+MS2(config)#int f0/2
+MS2(config-if)#des
+MS2(config-if)#description TO_MS1
+MS2(config-if)#no sw
+MS2(config-if)#no switchport 
+MS2(config-if)#ip add
+MS2(config-if)#ip address 192.168.0.10 255.255.255.252
+MS2(config-if)#no sh
+MS2(config-if)#no shutdown 
+MS2(config-if)#exit
+
+MS2(config)#int ra g0/2,f0/20, f0/15
+MS2(config-if-range)#
+MS2(config-if-range)#no sw
+MS2(config-if-range)#no switchport ac
+MS2(config-if-range)#no switchport access vl
+MS2(config-if-range)#no switchport access vlan 999
+MS2(config-if-range)#no sw
+MS2(config-if-range)#no switchport acc
+MS2(config-if-range)#no switchport access 
+% Incomplete command.
+MS2(config-if-range)#no sh
+MS2(config-if-range)#no shutdown 
+
+MS2(config)#sp
+MS2(config)#spanning-tree vl
+MS2(config)#spanning-tree vlan 20,40 r
+MS2(config)#spanning-tree vlan 20,40 root p
+MS2(config)#spanning-tree vlan 20,40 root primary 
+MS2(config)#sp
+MS2(config)#spanning-tree vl
+MS2(config)#spanning-tree vlan 10,20,99 r
+MS2(config)#spanning-tree vlan 10,20,99 root se
+MS2(config)#spanning-tree vlan 10,20,99 root secondary 
+Enter configuration commands, one per line.  End with CNTL/Z.
+MS2(config)#int ra f0/23, f0/20
+MS2(config-if-range)#sw
+MS2(config-if-range)#switchport m
+MS2(config-if-range)#switchport mode tr
+MS2(config-if-range)#switchport mode trunk 
+
+MS2(config-if-range)#
+%LINEPROTO-5-UPDOWN: Line protocol on Interface FastEthernet0/20, changed state to down
+
+%LINEPROTO-5-UPDOWN: Line protocol on Interface FastEthernet0/20, changed state to up
+sw
+MS2(config-if-range)#switchport tr
+MS2(config-if-range)#switchport trunk n
+MS2(config-if-range)#switchport trunk native vl
+MS2(config-if-range)#switchport trunk native vlan 1000
+MS2(config-if-range)#sw
+MS2(config-if-range)#switchport tr
+MS2(config-if-range)#switchport trunk al
+MS2(config-if-range)#switchport trunk allowed v
+MS2(config-if-range)#switchport trunk allowed vlan 30,40,99,1000
+MS2(config-if-range)#channel-gr
+MS2(config-if-range)#channel-group 2 m
+MS2(config-if-range)#channel-group 2 mode ac
+MS2(config-if-range)#channel-group 2 mode active 
+MS2(config-if-range)#
+Creating a port-channel interface Port-channel 2
+
+%LINEPROTO-5-UPDOWN: Line protocol on Interface FastEthernet0/23, changed state to down
+
+%EC-5-CANNOT_BUNDLE2: Fa0/23 is not compatible with Po2 and will be suspended (vlan mask is different)
+
+%LINEPROTO-5-UPDOWN: Line protocol on Interface FastEthernet0/20, changed state to down
+
+%EC-5-CANNOT_BUNDLE2: Fa0/20 is not compatible with Po2 and will be suspended (vlan mask is different)
+exit
+MS2(config)#int port
+MS2(config)#int port-channel 2
+MS2(config-if)#sw
+MS2(config-if)#switchport tr
+MS2(config-if)#switchport trunk m
+MS2(config-if)#switchport trunk m
+                                ^
+% Invalid input detected at '^' marker.
+	
+MS2(config-if)#switchport m
+MS2(config-if)#switchport mode tr
+MS2(config-if)#switchport mode trunk 
+Command rejected: An interface whose trunk encapsulation is "Auto" can not be configured to "trunk" mode.
+MS2(config-if)#sw
+MS2(config-if)#switchport tr
+MS2(config-if)#switchport tr
+MS2(config-if)#switchport trunk en
+MS2(config-if)#switchport trunk encapsulation d
+MS2(config-if)#switchport trunk encapsulation dot1q 
+MS2(config-if)#sw
+MS2(config-if)#switchport tr
+MS2(config-if)#switchport trunk n
+MS2(config-if)#switchport trunk native v
+MS2(config-if)#switchport trunk native vlan 1000
+MS2(config-if)#sw
+MS2(config-if)#switchport tr
+MS2(config-if)#switchport trunk al
+MS2(config-if)#switchport trunk allowed vl
+MS2(config-if)#switchport trunk allowed vlan 30,40,99,1000
+MS2(config-if)#exit
+MS2(config)#int ra f0/23, f0/20
+MS2(config-if-range)#sw
+MS2(config-if-range)#switchport tr
+MS2(config-if-range)#switchport trunk en
+MS2(config-if-range)#switchport trunk encapsulation d
+MS2(config-if-range)#switchport trunk encapsulation dot1q 
+MS2(config-if-range)#
+%EC-5-CANNOT_BUNDLE2: Fa0/23 is not compatible with Fa0/20 and will be suspended (trunk encap of Fa0/23 is auto, Fa0/20 is dot1q)
+
+%LINEPROTO-5-UPDOWN: Line protocol on Interface FastEthernet0/20, changed state to up
+
+%LINEPROTO-5-UPDOWN: Line protocol on Interface FastEthernet0/23, changed state to up
+end wr m
+                      ^
+% Invalid input detected at '^' marker.
+	
+MS2(config-if-range)#end
+MS2#
+%SYS-5-CONFIG_I: Configured from console by console
+show etherchannel summary
+Flags:  D - down        P - in port-channel
+        I - stand-alone s - suspended
+        H - Hot-standby (LACP only)
+        R - Layer3      S - Layer2
+        U - in use      f - failed to allocate aggregator
+        u - unsuitable for bundling
+        w - waiting to be aggregated
+        d - default port
+
+
+Number of channel-groups in use: 2
+Number of aggregators:           2
+
+Group  Port-channel  Protocol    Ports
+------+-------------+-----------+----------------------------------------------
+
+1      Po1(SU)           LACP   Fa0/15(P) Fa0/24(P) 
+2      Po2(SD)           LACP   Fa0/23(I) Fa0/20(I) 
+MS2#
 
 ```
 
 ```
+S1(config)#int range f0/16-17
+S1(config-if-range)#no sw
+S1(config-if-range)#no switchport ac
+S1(config-if-range)#no switchport access vl
+S1(config-if-range)#no switchport access vlan 999
+S1(config-if-range)#no sw
+S1(config-if-range)#no switchport m
+S1(config-if-range)#no switchport mode a
+S1(config-if-range)#no switchport mode acc
+S1(config-if-range)#no switchporta
+S1(config-if-range)#no switchport a
+S1(config-if-range)#no switchport mode 
+S1(config-if-range)#no switchport mode acc
+S1(config-if-range)#no switchport mode accees
+Command rejected: An interface must be configured to the Access or Trunk	modes to be configured to NoNegotiate.
+Command rejected: An interface must be configured to the Access or Trunk	modes to be configured to NoNegotiate.
+S1(config-if-range)#no switchport mode access
+Command rejected: An interface must be configured to the Access or Trunk	modes to be configured to NoNegotiate.
+Command rejected: An interface must be configured to the Access or Trunk	modes to be configured to NoNegotiate.
+S1(config-if-range)#no sh
+S1(config-if-range)#no shutdown 
+
+
+%LINK-5-CHANGED: Interface FastEthernet0/17, changed state to down
+S1(config-if-range)#
+%LINK-5-CHANGED: Interface FastEthernet0/16, changed state to up
+
+%LINEPROTO-5-UPDOWN: Line protocol on Interface FastEthernet0/16, changed state to up
+
+S1(config)#int ra f0/22, f0/17
+S1(config-if-range)#sw
+S1(config-if-range)#switchport tr
+S1(config-if-range)#de
+S1(config-if-range)#description 
+%CDP-4-NATIVE_VLAN_MISMATCH: Native VLAN mismatch discovered on FastEthernet0/16 (1), with MS1 FastEthernet0/15 (1000
+% Incomplete command.
+S1(config-if-range)#
+%CDP-4-NATIVE_VLAN_MISMATCH: Native VLAN mismatch discovered on FastEthernet0/16 (1), with MS1 FastEthernet0/15 (1000).
+
+S1(config-if-range)#de
+S1(config-if-range)#description ECH_TOS2
+S1(config-if-range)#sw
+S1(config-if-range)#switchport 
+%CDP-4-NATIVE_VLAN_MISMATCH: Native VLAN mismatch discovered on FastEthernet0/16 (1), with MS1 FastEthernet0/15 (1000).
+
+% Incomplete command.
+S1(config-if-range)#switchport  tr
+S1(config-if-range)#switchport  trunk en
+S1(config-if-range)#switchport  trunk enc
+S1(config-if-range)#switchport  tr
+S1(config-if-range)#switchport  trunk en
+S1(config-if-range)#switchport  trunk enca
+S1(config-if-range)#sw
+S1(config-if-range)#switchport m
+S1(config-if-range)#switchport mode tr
+S1(config-if-range)#switchport mode trunk 
+
+S1(config-if-range)#
+%LINEPROTO-5-UPDOWN: Line protocol on Interface FastEthernet0/17, changed state to down
+
+%LINEPROTO-5-UPDOWN: Line protocol on Interface FastEthernet0/17, changed state to up
+sw
+S1(config-if-range)#switchport tr
+S1(config-if-range)#switchport trunk en
+S1(config-if-range)#switchport trunk n
+S1(config-if-range)#switchport trunk native vl
+S1(config-if-range)#switchport trunk native vlan 1000
+S1(config-if-range)#sw
+S1(config-if-range)#switchport tr
+S1(config-if-range)#switchport trunk 
+%CDP-4-NATIVE_VLAN_MISMATCH: Native VLAN mismatch discovered on FastEthernet0/17 (1000), with S2 FastEthernet0/18 (1).
+all
+S1(config-if-range)#switchport trunk allowed vl
+S1(config-if-range)#switchport trunk allowed vlan 10.
+%CDP-4-NATIVE_VLAN_MISMATCH: Native VLAN mismatch discovered on FastEthernet0/16 (1), with MS1 FastEthernet0/15 (1000).
+,20,99,1000
+S1(config-if-range)#switchport trunk allowed vlan 10,20,99,1000
+S1(config-if-range)#channel-g
+S1(config-if-range)#channel-group 1 mode a
+S1(config-if-range)#channel-group 1 mode ac
+S1(config-if-range)#channel-group 1 mode active 
+S1(config-if-range)#
+Creating a port-channel interface Port-channel 1
+
+%LINEPROTO-5-UPDOWN: Line protocol on Interface FastEthernet0/22, changed state to down
+
+%LINEPROTO-5-UPDOWN: Line protocol on Interface FastEthernet0/22, changed state to up
+
+%LINEPROTO-5-UPDOWN: Line protocol on Interface FastEthernet0/17, changed state to down
+
+%LINEPROTO-5-UPDOWN: Line protocol on Interface FastEthernet0/17, changed state to up
+exit
+S1(config)#int
+S1(config)#interface  po
+S1(config)#interface  port-channel 1
+S1(config-if)#des
+S1(config-if)#description ECH_TOS2
+S1(config-if)#sw
+S1(config-if)#switchport tr
+S1(config-if)#switchport trunk en
+S1(config-if)#switchport trunk enc
+S1(config-if)#switchport m
+S1(config-if)#switchport mode tr
+S1(config-if)#switchport mode trunk 
+%CDP-4-NATIVE_VLAN_MISMATCH: Native VLAN mismatch discovered on FastEthernet0/17 (1000), with S2 FastEthernet0/18 (1).
+
+S1(config-if)#sw
+S1(config-if)#switchport tr
+S1(config-if)#switchport trunk n
+S1(config-if)#switchport trunk native v
+S1(config-if)#switchport trunk native vlan 
+%CDP-4-NATIVE_VLAN_MISMATCH: Native VLAN mismatch discovered on FastEthernet0/16 (1), with MS1 FastEthernet0/15 (1000).
+1000
+S1(config-if)#sw
+S1(config-if)#switchport tr
+S1(config-if)#switchport trunk al
+S1(config-if)#switchport trunk allowed vl
+S1(config-if)#switchport trunk allowed vlan 10,20,99,1000
+S1(config-if)#end
+S1#
+%SYS-5-CONFIG_I: Configured from console by console
+wr m
+Building configuration...
+[OK]
+S1#
+S1(config)#int ra f0/16, f0/23
+S1(config-if-range)#
+%CDP-4-NATIVE_VLAN_MISMATCH: Native VLAN mismatch discovered on FastEthernet0/17 (1000), with S2 FastEthernet0/18 (1).
+channel-gr
+S1(config-if-range)#channel-group 1 m
+S1(config-if-range)#channel-group 1 mode a
+S1(config-if-range)#channel-group 1 mode ac
+S1(config-if-range)#channel-group 1 mode active 
+S1(config-if-range)#
+%LINEPROTO-5-UPDOWN: Line protocol on Interface FastEthernet0/16, changed state to down
+
+%LINEPROTO-5-UPDOWN: Line protocol on Interface FastEthernet0/16, changed state to up
+
+%LINEPROTO-5-UPDOWN: Line protocol on Interface FastEthernet0/23, changed state to down
+
+%LINEPROTO-5-UPDOWN: Line protocol on Interface FastEthernet0/23, changed state to up
+
+S1(config-if-range)#end
+S1#
+%SYS-5-CONFIG_I: Configured from console by console
+
+S1#conf t
+Enter configuration commands, one per line.  End with CNTL/Z.
+S1(config)#int f0/17,f0
+%CDP-4-NATIVE_VLAN_MISMATCH: Native VLAN mismatch discovered on FastEthernet0/17 (1000), with S2 FastEthernet0/18 (1).
+/22
+                  ^
+% Invalid input detected at '^' marker.
+	
+S1(config)#int ra f0/17,f0/22
+S1(config-if-range)#channel -g
+S1(config-if-range)#channel-g
+S1(config-if-range)#channel-group ?
+  <1-6>  Channel group number
+S1(config-if-range)#channel-group 2 ?
+  mode  Etherchannel Mode of the interface
+S1(config-if-range)#channel-group 2 m
+S1(config-if-range)#channel-group 2 mode a
+S1(config-if-range)#channel-group 2 mode ac
+S1(config-if-range)#channel-group 2 mode active 
+S1(config-if-range)#
+%LINEPROTO-5-UPDOWN: Line protocol on Interface FastEthernet0/17, changed state to down
+
+%LINEPROTO-5-UPDOWN: Line protocol on Interface FastEthernet0/17, changed state to up
+
+%LINEPROTO-5-UPDOWN: Line protocol on Interface FastEthernet0/22, changed state to down
+
+%LINEPROTO-5-UPDOWN: Line protocol on Interface FastEthernet0/22, changed state to up
+no sh
+S1(config-if-range)#no shutdown 
+S1(config-if-range)#
+%CDP-4-NATIVE_VLAN_MISMATCH: Native VLAN mismatch discovered on FastEthernet0/17 (1000), with S2 FastEthernet0/18 (1).
 
 ```
 
-```
-
 
 ```
 
+S2(config)#int ra f0/18-19
+S2(config-if-range)#no sw
+S2(config-if-range)#no switchport ac
+S2(config-if-range)#no switchport access vl
+S2(config-if-range)#no switchport access vlan 999
+S2(config-if-range)#no sh
+S2(config-if-range)#no shutdown 
+
+%LINK-5-CHANGED: Interface FastEthernet0/18, changed state to down
+
+S2(config-if-range)#
+%LINK-5-CHANGED: Interface FastEthernet0/19, changed state to up
+
+%LINEPROTO-5-UPDOWN: Line protocol on Interface FastEthernet0/18, changed state to up
+S2(config)#des
+S2(config)#int ra f0/24,
+%CDP-4-NATIVE_VLAN_MISMATCH: Native VLAN mismatch discovered on FastEthernet0/18 (1), with S1 FastEthernet0/17 (1000).
+ f0/19
+S2(config-if-range)#des
+S2(config-if-range)#description ECH_TOMS1
+S2(config-if-range)#sw
+S2(config-if-range)#switchport m
+S2(config-if-range)#switchport mode tr
+S2(config-if-range)#switchport mode trunk 
+
+S2(config-if-range)#
+%LINEPROTO-5-UPDOWN: Line protocol on Interface FastEthernet0/19, changed state to down
+
+%LINEPROTO-5-UPDOWN: Line protocol on Interface FastEthernet0/19, changed state to up
+sw
+S2(config-if-range)#switchport tr
+S2(config-if-range)#switchport trunk n
+S2(config-if-range)#switchport trunk native 1000
+                                            ^
+% Invalid input detected at '^' marker.
+	
+S2(config-if-range)#sw
+S2(config-if-range)#switchport tr
+S2(config-if-range)#switchport trunk al
+S2(config-if-range)#sw
+S2(config-if-range)#switchport tr
+S2(config-if-range)#switchport trunk n
+S2(config-if-range)#switchport trunk native vl
+S2(config-if-range)#switchport trunk native vlan 1000
+S2(config-if-range)#sw
+S2(config-if-range)#switchport %SPANTREE-2-RECV_PVID_ERR: Received BPDU with inconsistent peer vlan id 1 on FastEthernet0/19 VLAN1000.
+
+%SPANTREE-2-BLOCK_PVID_LOCAL: Blocking FastEthernet0/19 on VLAN1000. Inconsistent local vlan.
+
+tr
+S2(config-if-range)#switchport trunk al
+S2(config-if-range)#switchport trunk allowed vl
+S2(config-if-range)#switchport trunk allowed vlan 10,20,
+%CDP-4-NATIVE_VLAN_MISMATCH: Native VLAN mismatch discovered on FastEthernet0/18 (1), with S1 FastEthernet0/17 (1000).
+99,1000
+S2(config-if-range)#%SPANTREE-2-RECV_PVID_ERR: Received BPDU with inconsistent peer vlan id 1 on FastEthernet0/19 VLAN1000.
+
+%SPANTREE-2-BLOCK_PVID_LOCAL: Blocking FastEthernet0/19 on VLAN1000. Inconsistent local vlan.
+
+switchport trunk allowed vlan 10,20,99,1000
+S2(config-if-range)#%SPANTREE-2-RECV_PVID_ERR: Received BPDU with inconsistent peer vlan id 1 on FastEthernet0/19 VLAN1000.
+
+%SPANTREE-2-BLOCK_PVID_LOCAL: Blocking FastEthernet0/19 on VLAN1000. Inconsistent local vlan.
+
+channek-g
+S2(config-if-range)#channek-g
+S2(config-if-range)#channek-gr
+S2(config-if-range)#channel-g
+S2(config-if-range)#channel-group 1 m
+S2(config-if-range)#channel-group 1 mode a
+S2(config-if-range)#channel-group 1 mode ac
+S2(config-if-range)#channel-group 1 mode active 
+S2(config-if-range)#
+Creating a port-channel interface Port-channel 1
+
+%LINEPROTO-5-UPDOWN: Line protocol on Interface FastEthernet0/24, changed state to down
+
+%LINEPROTO-5-UPDOWN: Line protocol on Interface FastEthernet0/24, changed state to up
+
+%LINEPROTO-5-UPDOWN: Line protocol on Interface FastEthernet0/19, changed state to down
+
+%LINEPROTO-5-UPDOWN: Line protocol on Interface FastEthernet0/19, changed state to up
+
+%LINK-5-CHANGED: Interface Port-channel1, changed state to up
+
+%LINEPROTO-5-UPDOWN: Line protocol on Interface Port-channel1, changed state to up
+
+%CDP-4-NATIVE_VLAN_MISMATCH: Native VLAN mismatch discovered on FastEthernet0/19 (1000), with MS1 FastEthernet0/20 (1).
+
+%CDP-4-NATIVE_VLAN_MISMATCH: Native VLAN mismatch discovered on FastEthernet0/24 (1000), with MS1 FastEthernet0/20 (1).
+%SPANTREE-2-RECV_PVID_ERR: Received BPDU with inconsistent peer vlan id 1 on Port-channel1 VLAN1000.
+
+%SPANTREE-2-BLOCK_PVID_LOCAL: Blocking Port-channel1 on VLAN1000. Inconsistent local vlan.
+
+exit
+S2(config)#int por
+S2(config)#int port-channel 1
+S2(config-if)#des
+S2(config-if)#description ECH_TOMS1
+S2(config-if)#sw
+S2(config-if)#switchport m
+S2(config-if)#switchport mode tr
+S2(config-if)#switchport mode trunk 
+S2(config-if)#sw
+S2(config-if)#switchport tr
+S2(config-if)#switchport trunk n
+S2(config-if)#switchport trunk native v
+S2(config-if)#switchport trunk native vlan 1000
+S2(config-if)#sw
+S2(config-if)#switchport tr
+S2(config-if)#switchport trunk al
+%CDP-4-NATIVE_VLAN_MISMATCH: Native VLAN mismatch discovered on FastEthernet0/18 (1), with S1 FastEthernet0/17 (1000).
+
+S2(config-if)#switchport trunk allowed v
+S2(config-if)#switchport trunk allowed vlan 10,20,99,1000
+S2(config-if)#exit
+S2(config)#%SPANTREE-2-RECV_PVID_ERR: Received BPDU with inconsistent peer vlan id 1 on Port-channel1 VLAN1000.
+
+%SPANTREE-2-BLOCK_PVID_LOCAL: Blocking Port-channel1 on VLAN1000. Inconsistent local vlan.
+
+end wr m
+               ^
+% Invalid input detected at '^' marker.
+	
+S2(config)#end
+S2#
+%SYS-5-CONFIG_I: Configured from console by console
+wrm
+Translating "wrm"
+% Unknown command or computer name, or unable to find computer address
+
+S2#wr m
+Building configuration...
+[OK]
+S2#
+%CDP-4-NATIVE_VLAN_MISMATCH: Native VLAN mismatch discovered on FastEthernet0/19 (1000), with MS1 FastEthernet0/20 (1).
+
+%CDP-4-NATIVE_VLAN_MISMATCH: Native VLAN mismatch discovered on FastEthernet0/24 (1000), with MS1 FastEthernet0/20 (1).
+
 ```
 
 
-```
 
 ```
+S3(config)#int ra f0/16-17
+S3(config-if-range)#no sw
+S3(config-if-range)#no switchport a
+S3(config-if-range)#no switchport access v
+S3(config-if-range)#no switchport access vlan 999
+S3(config-if-range)#no sh
+S3(config-if-range)#no shutdown 
+
+
+%LINK-5-CHANGED: Interface FastEthernet0/17, changed state to down
+S3(config-if-range)#
+%LINK-5-CHANGED: Interface FastEthernet0/16, changed state to up
+
+%LINEPROTO-5-UPDOWN: Line protocol on Interface FastEthernet0/16, changed state to up
+S3(config)#int ra
+S3(config)#int range f0/16, f0/24
+S3(config-if-range)#sw
+S3(config-if-range)#switchport tr
+S3(config-if-range)#switchport trunk m
+S3(config-if-range)#switchport trunk m
+                                     ^
+% Invalid input detected at '^' marker.
+	
+S3(config-if-range)#sw
+S3(config-if-range)#switchport m
+S3(config-if-range)#switchport mode tr
+S3(config-if-range)#switchport mode trunk 
+
+S3(config-if-range)#
+%LINEPROTO-5-UPDOWN: Line protocol on Interface FastEthernet0/16, changed state to down
+
+%LINEPROTO-5-UPDOWN: Line protocol on Interface FastEthernet0/16, changed state to up
+sw
+S3(config-if-range)#switchport %SPANTREE-2-RECV_PVID_ERR: Received BPDU with inconsistent peer vlan id 1000 on FastEthernet0/16 VLAN1.
+
+%SPANTREE-2-BLOCK_PVID_LOCAL: Blocking FastEthernet0/16 on VLAN0001. Inconsistent local vlan.
+
+tr
+S3(config-if-range)#switchport trunk n
+S3(config-if-range)#switchport trunk native v
+S3(config-if-range)#switchport trunk native vlan 1000
+S3(config-if-range)#sw
+S3(config-if-range)#switchport tr
+S3(config-if-range)#switchport trunk %SPANTREE-2-UNBLOCK_CONSIST_PORT: Unblocking FastEthernet0/16 on VLAN1000. Port consistency restored.
+
+%SPANTREE-2-UNBLOCK_CONSIST_PORT: Unblocking FastEthernet0/16 on VLAN0001. Port consistency restored.
+
+
+% Incomplete command.
+S3(config-if-range)#switchport trunk al
+S3(config-if-range)#switchport trunk allowed v
+S3(config-if-range)#switchport trunk allowed vlan 30,40,99,1000
+S3(config-if-range)#exit
+S3(config)#int range f0/16, f0/24
+S3(config-if-range)#channel-g
+S3(config-if-range)#channel-group 2 m
+S3(config-if-range)#channel-group 2 mode a
+S3(config-if-range)#channel-group 2 mode ac
+S3(config-if-range)#channel-group 2 mode active 
+S3(config-if-range)#
+Creating a port-channel interface Port-channel 2
+
+%LINEPROTO-5-UPDOWN: Line protocol on Interface FastEthernet0/16, changed state to down
+
+%LINEPROTO-5-UPDOWN: Line protocol on Interface FastEthernet0/16, changed state to up
+
+%LINEPROTO-5-UPDOWN: Line protocol on Interface FastEthernet0/24, changed state to down
+
+%LINEPROTO-5-UPDOWN: Line protocol on Interface FastEthernet0/24, changed state to up
+
+%LINK-5-CHANGED: Interface Port-channel2, changed state to up
+
+%LINEPROTO-5-UPDOWN: Line protocol on Interface Port-channel2, changed state to up
+exit
+S3(config)#int po
+S3(config)#int port-channel 2
+S3(config-if)#sw
+S3(config-if)#switchport m
+S3(config-if)#switchport mode tr
+S3(config-if)#switchport mode trunk 
+S3(config-if)#sw
+S3(config-if)#switchport tr
+S3(config-if)#switchport trunk n
+S3(config-if)#switchport trunk native vl
+S3(config-if)#switchport trunk native vlan 1000
+S3(config-if)#sw
+S3(config-if)#switchport tr
+S3(config-if)#switchport trunk al
+S3(config-if)#switchport trunk allowed vl
+S3(config-if)#switchport trunk allowed vlan 30,40,99,1000
+S3(config-if)#end
+S3#
+%SYS-5-CONFIG_I: Configured from console by console
+wr m
+Building configuration...
+[OK]
+S3#
+S3#conf t
+Enter configuration commands, one per line.  End with CNTL/Z.
+S3(config)#int ra f0/17,f0/22
+S3(config-if-range)#sw
+S3(config-if-range)#switchport m
+S3(config-if-range)#switchport mode tr
+S3(config-if-range)#switchport mode trunk 
+
+S3(config-if-range)#
+%LINEPROTO-5-UPDOWN: Line protocol on Interface FastEthernet0/17, changed state to down
+
+%LINEPROTO-5-UPDOWN: Line protocol on Interface FastEthernet0/17, changed state to up
+sw
+S3(config-if-range)#switchport tr
+S3(config-if-range)#switchport trunk n
+S3(config-if-range)#switchport trunk native v
+S3(config-if-range)#switchport trunk native vlan 1000
+S3(config-if-range)#sw
+S3(config-if-range)#switchport tr
+S3(config-if-range)#switchport trunk al
+S3(config-if-range)#switchport trunk allowed v
+S3(config-if-range)#switchport trunk allowed vlan 30,40,99,1000
+S3(config-if-range)#channel-gr
+S3(config-if-range)#channel-group 1m
+S3(config-if-range)#channel-group 1 m
+S3(config-if-range)#channel-group 1 mode a
+S3(config-if-range)#channel-group 1 mode a
+% Ambiguous command: "channel-group 1 mode a"
+S3(config-if-range)#channel-group 1 mode ac
+S3(config-if-range)#channel-group 1 mode active 
+S3(config-if-range)#
+Creating a port-channel interface Port-channel 1
+
+%LINEPROTO-5-UPDOWN: Line protocol on Interface FastEthernet0/17, changed state to down
+
+%LINEPROTO-5-UPDOWN: Line protocol on Interface FastEthernet0/17, changed state to up
+
+%LINEPROTO-5-UPDOWN: Line protocol on Interface FastEthernet0/22, changed state to down
+
+%LINEPROTO-5-UPDOWN: Line protocol on Interface FastEthernet0/22, changed state to up
+exit
+S3(config)#int por
+S3(config)#int port-channel 1
+S3(config-if)#sw
+S3(config-if)#switchport 
+S3(config-if)#switchport m
+S3(config-if)#switchport mode tr
+S3(config-if)#switchport mode trunk 
+S3(config-if)#sw
+S3(config-if)#switchport tr
+S3(config-if)#switchport trunk na
+S3(config-if)#switchport trunk native 1000
+                                      ^
+% Invalid input detected at '^' marker.
+	
+S3(config-if)#sw
+S3(config-if)#switchport trunk native vlan 1000
+S3(config-if)#switchport trunk al
+S3(config-if)#switchport trunk allowed vl
+S3(config-if)#switchport trunk allowed vlan 30,40,99,1000
+S3(config-if)#exit
+S3(config)#
+%CDP-4-NATIVE_VLAN_MISMATCH: Native VLAN mismatch discovered on FastEthernet0/17 (1000), with S4 FastEthernet0/18 (1).
+```
 
 
 
+```
+
+S4(config)#int ra f0/18-19
+S4(config-if-range)#no sh
+S4(config-if-range)#no sw
+S4(config-if-range)#no switchport a
+S4(config-if-range)#no switchport access vl
+S4(config-if-range)#no switchport access vlan 999
+S4(config-if-range)#no sh
+S4(config-if-range)#no shutdown 
 
 
+S4(config-if-range)#
+%LINK-5-CHANGED: Interface FastEthernet0/18, changed state to up
 
+%LINEPROTO-5-UPDOWN: Line protocol on Interface FastEthernet0/18, changed state to up
 
+%LINK-5-CHANGED: Interface FastEthernet0/19, changed state to up
 
+%LINEPROTO-5-UPDOWN: Line protocol on Interface FastEthernet0/19, changed state to up
 
+S4(config)#int ra f0/18,f0/
+%CDP-4-NATIVE_VLAN_MISMATCH: Native VLAN mismatch discovered on FastEthernet0/19 (1), with MS2 FastEthernet0/20 (1000).
+22
+S4(config-if-range)#sw
+S4(config-if-range)#switchport m
+S4(config-if-range)#switchport mode tr
+S4(config-if-range)#switchport mode trunk 
+
+S4(config-if-range)#
+%LINEPROTO-5-UPDOWN: Line protocol on Interface FastEthernet0/18, changed state to down
+
+%LINEPROTO-5-UPDOWN: Line protocol on Interface FastEthernet0/18, changed state to up
+sw
+S4(config-if-range)#switchport tr
+S4(config-if-range)#switchport trunk na
+S4(config-if-range)#switchport trunk native %SPANTREE-2-RECV_PVID_ERR: Received BPDU with inconsistent peer vlan id 1000 on FastEthernet0/18 VLAN1.
+
+%SPANTREE-2-BLOCK_PVID_LOCAL: Blocking FastEthernet0/18 on VLAN0001. Inconsistent local vlan.
+
+1000
+                                            ^
+% Invalid input detected at '^' marker.
+	
+S4(config-if-range)#sw
+S4(config-if-range)#switchport tr
+S4(config-if-range)#switchport trunk al
+S4(config-if-range)#switchport trunk allowed v
+S4(config-if-range)#switchport trunk n
+S4(config-if-range)#switchport trunk native v
+S4(config-if-range)#switchport trunk native vlan 1000
+S4(config-if-range)#sw
+S4(config-if-range)#switchport %SPANTREE-2-UNBLOCK_CONSIST_PORT: Unblocking FastEthernet0/18 on VLAN1000. Port consistency restored.
+
+%SPANTREE-2-UNBLOCK_CONSIST_PORT: Unblocking FastEthernet0/18 on VLAN0001. Port consistency restored.
+
+tr
+S4(config-if-range)#switchport trunk al
+S4(config-if-range)#switchport trunk allowed v
+S4(config-if-range)#switchport trunk allowed vlan 30,40,99,1000
+S4(config-if-range)#channel-g
+S4(config-if-range)#channel-group 2 m
+S4(config-if-range)#channel-group 2 mode ac
+S4(config-if-range)#channel-group 2 mode active 
+S4(config-if-range)#
+Creating a port-channel interface Port-channel 2
+
+%LINEPROTO-5-UPDOWN: Line protocol on Interface FastEthernet0/18, changed state to down
+
+%LINEPROTO-5-UPDOWN: Line protocol on Interface FastEthernet0/18, changed state to up
+
+%LINEPROTO-5-UPDOWN: Line protocol on Interface FastEthernet0/22, changed state to down
+
+%LINEPROTO-5-UPDOWN: Line protocol on Interface FastEthernet0/22, changed state to up
+
+%LINK-5-CHANGED: Interface Port-channel2, changed state to up
+
+%LINEPROTO-5-UPDOWN: Line protocol on Interface Port-channel2, changed state to up
+exit
+S4(config)#int po
+S4(config)#int port-channel 2
+S4(config-if)#sw
+S4(config-if)#switchport m
+S4(config-if)#switchport mode tr
+S4(config-if)#switchport mode trunk 
+S4(config-if)#sw
+S4(config-if)#switchport tr
+S4(config-if)#switchport trunk n
+S4(config-if)#switchport trunk native v
+S4(config-if)#switchport trunk native vlan 1000
+S4(config-if)#
+S4(config-if)#sw
+S4(config-if)#switchport tr
+S4(config-if)#switchport trunk al
+S4(config-if)#switchport trunk allowed v
+S4(config-if)#switchport trunk allowed vlan 30,40,99,1000
+S4(config-if)#exit
+S4(config)#
+%CDP-4-NATIVE_VLAN_MISMATCH: Native VLAN mismatch discovered on FastEthernet0/19 (1), with MS2 FastEthernet0/20 (1000).
+int ra f0/19,f0/23
+S4(config-if-range)#sw
+S4(config-if-range)#switchport m
+S4(config-if-range)#switchport mode tr
+S4(config-if-range)#switchport mode trunk 
+
+S4(config-if-range)#
+%LINEPROTO-5-UPDOWN: Line protocol on Interface FastEthernet0/19, changed state to down
+
+%LINEPROTO-5-UPDOWN: Line protocol on Interface FastEthernet0/19, changed state to up
+%SPANTREE-2-RECV_PVID_ERR: Received BPDU with inconsistent peer vlan id 1000 on FastEthernet0/19 VLAN1.
+
+%SPANTREE-2-BLOCK_PVID_LOCAL: Blocking FastEthernet0/19 on VLAN0001. Inconsistent local vlan.
+
+sw
+S4(config-if-range)#switchport tr
+S4(config-if-range)#switchport trunk na
+S4(config-if-range)#switchport trunk native v
+S4(config-if-range)#switchport trunk native vlan 1000
+S4(config-if-range)#sw
+S4(config-if-range)#switchport %SPANTREE-2-UNBLOCK_CONSIST_PORT: Unblocking FastEthernet0/19 on VLAN1000. Port consistency restored.
+
+%SPANTREE-2-UNBLOCK_CONSIST_PORT: Unblocking FastEthernet0/19 on VLAN0001. Port consistency restored.
+
+tr
+S4(config-if-range)#switchport trunk al
+S4(config-if-range)#switchport trunk allowed vl
+S4(config-if-range)#switchport trunk allowed vlan 30,40,99,1000
+S4(config-if-range)#channel-gr
+S4(config-if-range)#channel-group 1 m
+S4(config-if-range)#channel-group 1 mode ac
+S4(config-if-range)#channel-group 1 mode active 
+S4(config-if-range)#
+Creating a port-channel interface Port-channel 1
+
+%LINEPROTO-5-UPDOWN: Line protocol on Interface FastEthernet0/19, changed state to down
+
+%LINEPROTO-5-UPDOWN: Line protocol on Interface FastEthernet0/19, changed state to up
+
+%LINEPROTO-5-UPDOWN: Line protocol on Interface FastEthernet0/23, changed state to down
+
+%LINEPROTO-5-UPDOWN: Line protocol on Interface FastEthernet0/23, changed state to up
+
+%LINK-5-CHANGED: Interface Port-channel1, changed state to up
+
+%LINEPROTO-5-UPDOWN: Line protocol on Interface Port-channel1, changed state to up
+exit
+S4(config)#int
+% Incomplete command.
+S4(config)#int po
+S4(config)#int port-channel 1
+S4(config-if)#sw
+S4(config-if)#switchport m
+S4(config-if)#switchport mode tr
+S4(config-if)#switchport mode trunk 
+S4(config-if)#sw
+S4(config-if)#switchport tr
+S4(config-if)#switchport trunk na
+S4(config-if)#switchport trunk native 1000
+                                      ^
+% Invalid input detected at '^' marker.
+	
+S4(config-if)#sw
+S4(config-if)#switchport tr
+S4(config-if)#switchport trunk al
+S4(config-if)#switchport trunk allowed 30,40,99,1000
+                                       ^
+% Invalid input detected at '^' marker.
+	
+S4(config-if)#switchport trunk allowed vlan 30,40,99,1000
+S4(config-if)#
+```
+На правом сегменте сети все агрегированные каналы встали, на левом сегменте есть проблема между MS1 И S1, РАЗБИРАЮСЬ
+
+![alt text](image-12.png)
 
 
 
