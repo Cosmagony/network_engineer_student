@@ -1,4 +1,4 @@
-# Proekt_Построение масштабируемой двухуровневой сети с нуля в здании Пулковской обсерватории.
+# Proekt_Построение масштабируемой двухуровневой сети c избыточностью с нуля в здании Пулковской обсерватории.
 
 Работа выполнена на ПК с установленным Cisco Packet Tracer.
 
@@ -83,6 +83,7 @@ R1(config-if)#description LOOPBACK_1
 R1(config-if)#ip ad
 R1(config-if)#ip address 203.0.113.1 255.255.255.248
 R1(config-if)#exit
+R1(config)#ip route 0.0.0.0 0.0.0.0 203.0.113.230
 R1(config)#int g0/0/0
 R1(config-if)#des
 R1(config-if)#description TO_MS1
@@ -2932,7 +2933,29 @@ MS1(config-if)#switchport tr
 MS1(config-if)#switchport trunk al
 MS1(config-if)#switchport trunk allowed v
 MS1(config-if)#switchport trunk allowed vlan 10,20,99,1000
-MS1(config-if)#end wr m
+MS1(config)#int g0/2
+MS1(config-if)#ip add
+MS1(config-if)#ip address 192.168.0.12 255.255.255.252
+Bad mask /30 for address 192.168.0.12
+MS1(config-if)#ip address 192.168.0.13 255.255.255.252
+MS1(config-if)#
+MS1(config-if)#no sh
+MS1(config-if)#no shutdown 
+MS1(config-if)#exit
+MS1(config)#rout
+MS1(config)#router osf
+MS1(config)#router osf\
+MS1(config)#router os
+MS1(config)#router ospf 1
+MS1(config-router)#net
+MS1(config-router)#network 192.168.0.8 0.0.0.3 area 0
+MS1(config-router)#exit
+MS1(config)#end
+MS1#
+%SYS-5-CONFIG_I: Configured from console by console
+wr m
+Building configuration...
+[OK]
 
 
 MS1(config)#sp
@@ -2969,7 +2992,40 @@ MS2(config-if-range)#no switchport access
 % Incomplete command.
 MS2(config-if-range)#no sh
 MS2(config-if-range)#no shutdown 
+MS2(config)#int g0/2
+MS2(config-if)#no sw
+MS2(config-if)#no switchport ac
+MS2(config-if)#no switchport access v
+MS2(config-if)#no switchport access vlan 999
+MS2(config-if)#no sw
+MS2(config-if)#no switchport m
+MS2(config-if)#no switchport mode access
+Command rejected: An interface must be configured to the Access or Trunk	modes to be configured to NoNegotiate.
+MS2(config-if)#des
+MS2(config-if)#description TO_MS1
+MS2(config-if)#no sw
+MS2(config-if)#no switchport 
+MS2(config-if)#
+%LINEPROTO-5-UPDOWN: Line protocol on Interface GigabitEthernet0/2, changed state to down
 
+%LINEPROTO-5-UPDOWN: Line protocol on Interface GigabitEthernet0/2, changed state to up
+ip add
+MS2(config-if)#ip address 192.168.0.14 255.255.255.252
+MS2(config-if)#no sh
+MS2(config-if)#no shutdown 
+MS2(config-if)#exit
+MS2(config)#rout
+MS2(config)#router os
+MS2(config)#router ospf 1
+MS2(config-router)#net
+MS2(config-router)#network 192.168.0.8 0.0.0.3 area 0
+MS2(config-router)#exit
+MS2(config)#end
+MS2#
+%SYS-5-CONFIG_I: Configured from console by console
+wr m
+Building configuration...
+[OK]
 MS2(config)#sp
 MS2(config)#spanning-tree vl
 MS2(config)#spanning-tree vlan 20,40 r
@@ -3751,32 +3807,421 @@ S4(config-if)#switchport trunk allowed 30,40,99,1000
 S4(config-if)#switchport trunk allowed vlan 30,40,99,1000
 S4(config-if)#
 ```
-На правом сегменте сети все агрегированные каналы встали, на левом сегменте есть проблема между MS1 И S1, РАЗБИРАЮСЬ
+На правом сегменте сети все агрегированные каналы встали, на левом сегменте есть проблема между MS1 И S1, разбираюсь. 
+Не все записи и команды получилось вставить так как из-за предупреждений они улетели вверх.
+
+Проверка разрешенных вланов, так как коммутатор активно ругался на влан10. с агрегироваными каналами тоже проблем не было, как и на других коммутаторах слева.
+
+```
+S2#show interfaces f0/22 switchport | include Trunking VLANs Enabled
+Trunking VLANs Enabled: 10,20,99,1000
+S2#show interfaces f0/19 switchport | include Trunking VLANs Enabled
+Trunking VLANs Enabled: 10,20,99,1000
+S2#show interfaces f0/24 switchport | include Trunking VLANs Enabled
+Trunking VLANs Enabled: 10,20,99,1000
+S2#show interfaces f0/18 switchport | include Trunking VLANs Enabled
+Trunking VLANs Enabled: 10,20,99,1000
+```
+
+После перезапуска пакет трейсера, всё поднялось.
 
 ![alt text](image-12.png)
 
+Прописываю spanning-tree portfast для коммутаторов S1-4 на портах к пк.
+
+от пк есть пинг до маршрутизатора
 
 
+```
+C:\>ping 192.168.0.1
 
+Pinging 192.168.0.1 with 32 bytes of data:
 
+Reply from 192.168.0.1: bytes=32 time<1ms TTL=254
+Reply from 192.168.0.1: bytes=32 time<1ms TTL=254
+Reply from 192.168.0.1: bytes=32 time<1ms TTL=254
+Reply from 192.168.0.1: bytes=32 time<1ms TTL=254
 
+Ping statistics for 192.168.0.1:
+    Packets: Sent = 4, Received = 4, Lost = 0 (0% loss),
+Approximate round trip times in milli-seconds:
+    Minimum = 0ms, Maximum = 0ms, Average = 0ms
+```
 
+#### Шаг 8. Настройка PAT И ACL
 
+Переодически отваливался DHCP, то работает на пк то не работает рандомно, при перезапуске программы выдает также рандомную работу, пыталась увеличить время, но не помогло. Вычитала, что это может быть из-за нестабильной работы снупинга, отключила его на всех коммутаторах. Больше проблем не возникало.
 
+```
+S2(config)#no ip dhcp snooping
+```
 
+Начинаем настройку
 
+```
+R1(config)#acc
+R1(config)#access-list 1 p
+R1(config)#access-list 1 permit 192.168.0.0 0.0.255.255
+R1(config)#
+R1(config)#ip na
+R1(config)#ip nat poo
+R1(config)#ip nat pool PUBLIC_ACCESS 203.0.113.150 203.0.113.255 n
+R1(config)#ip nat pool PUBLIC_ACCESS 203.0.113.150 203.0.113.250 netmask 255.255.255.0 
+R1(config)#
+R1(config)#ip nat in
+R1(config)#ip nat inside s
+R1(config)#ip nat inside source l
+R1(config)#ip nat inside source list 1 po
+R1(config)#ip nat inside source list 1 pool PUBLIC_ACCESS
+R1(config)#ip nat in
+R1(config)#ip nat inside s
+R1(config)#ip nat inside source l
+R1(config)#ip nat inside source list 1 po
+R1(config)#ip nat inside source list 1 pool PUBLIC_ACCESS
+R1(config)#
+R1(config)#int ra g0/0/0-1
+R1(config-if-range)#ip nat
+R1(config-if-range)#ip nat ins
+R1(config-if-range)#ip nat inside 
+R1(config-if-range)#exit
+R1(config)#int lo
+R1(config)#int loopback 1
+R1(config-if)#ip na
+R1(config-if)#ip nat out
+R1(config-if)#ip nat outside 
+R1(config)#end
+R1#show ip nat translations 
+Pro  Inside global     Inside local       Outside local      Outside global
+icmp 203.0.113.150:13  192.168.20.32:13   203.0.113.3:13     203.0.113.3:13
+icmp 203.0.113.150:14  192.168.20.32:14   203.0.113.3:14     203.0.113.3:14
+icmp 203.0.113.150:15  192.168.20.32:15   203.0.113.3:15     203.0.113.3:15
+icmp 203.0.113.150:27  192.168.10.20:27   203.0.113.2:27     203.0.113.2:27
+icmp 203.0.113.150:28  192.168.10.20:28   203.0.113.2:28     203.0.113.2:28
+icmp 203.0.113.150:29  192.168.10.20:29   203.0.113.2:29     203.0.113.2:29
+icmp 203.0.113.150:30  192.168.10.20:30   203.0.113.2:30     203.0.113.2:30
+icmp 203.0.113.150:5   192.168.20.31:5    203.0.113.2:5      203.0.113.2:5
+icmp 203.0.113.150:6   192.168.20.31:6    203.0.113.2:6      203.0.113.2:6
+icmp 203.0.113.150:7   192.168.20.31:7    203.0.113.2:7      203.0.113.2:7
+icmp 203.0.113.150:8   192.168.20.31:8    203.0.113.2:8      203.0.113.2:8
+icmp 203.0.113.150:9   192.168.20.31:9    203.0.113.2:9      203.0.113.2:9
+```
 
+Для нормальной проверки создаю на интерфейсе g0/0/2 выход в интернет, так как изначально не расчитала кол-во интерфейсов у маршрутизатора и не могу подключить второй для симмуляции выхода в интернет.
 
+```
+R1(config)#int g0/0/2
 
+R1(config-if)#
+%LINK-5-CHANGED: Interface Loopback2, changed state to up
 
+%LINEPROTO-5-UPDOWN: Line protocol on Interface Loopback2, changed state to up
+ipSS
+R1(config-if)#ip add
+R1(config-if)#ip address 203.0.113.100 255.255.255.255
+R1(config-if)#exit
+R1(config)#ip route 203.0.113.100 255.255.255.255 Loopback1
+R1(config)#end
+R1#
+%SYS-5-CONFIG_I: Configured from console by console
+ wr m
+Building configuration...
+```
 
+```
+C:\>ping 203.0.113.100
 
+Pinging 203.0.113.100 with 32 bytes of data:
 
+Reply from 203.0.113.100: bytes=32 time<1ms TTL=254
+Reply from 203.0.113.100: bytes=32 time<1ms TTL=254
+Reply from 203.0.113.100: bytes=32 time<1ms TTL=254
+Reply from 203.0.113.100: bytes=32 time<1ms TTL=254
+```
 
+Так не получилось и тут запуталась что куда и откуда. 
 
+```
+R1(config)#int g0/0/2
+R1(config-if)#no sh
+R1(config-if)#no shutdown 
 
+R1(config-if)#
+%LINK-5-CHANGED: Interface GigabitEthernet0/0/2, changed state to up
+shutdown 
 
+R1(config-if)#
+%LINK-5-CHANGED: Interface GigabitEthernet0/0/2, changed state to administratively down
+no shutdown 
 
+R1(config-if)#
+%LINK-5-CHANGED: Interface GigabitEthernet0/0/2, changed state to up
+des
+R1(config-if)#description TO_INTERNET
+R1(config-if)#ip add
+R1(config-if)#exit
+R1(config)#no int ;oo
+R1(config)#no int loo[
+R1(config)#no interface loopback 2
+R1(config)#
+%LINK-5-CHANGED: Interface Loopback2, changed state to administratively down
+
+%LINEPROTO-5-UPDOWN: Line protocol on Interface Loopback2, changed state to down
+int g0/0/2
+R1(config-if)#ap add
+R1(config-if)#ap ad
+R1(config-if)#ip add
+R1(config-if)#ip address 203.0.113.100 255.255.255.255
+Bad mask /32 for address 203.0.113.100
+R1(config-if)#ip address 203.0.113.100 255.255.255.0
+% 203.0.113.0 overlaps with Loopback1
+R1(config-if)#ip address ip address 203.0.113.100 255.255.255.255
+                         ^
+% Invalid input detected at '^' marker.
+	
+R1(config-if)#ip address 203.0.113.100 255.255.255.255
+Bad mask /32 for address 203.0.113.100
+R1(config-if)#ip address 203.0.113.100 255.255.255.0
+% 203.0.113.0 overlaps with Loopback1
+R1(config-if)#ip address 209.165.200.230 255.255.255.248
+R1(config-if)#exit
+R1(config)#int loopback 1
+R1(config-if)#no ip nat outside 
+R1(config-if)#exit
+R1(config)#int g0/0/2
+R1(config-if)#ip nat out
+R1(config-if)#ip nat outside 
+R1(config-if)#no sh
+R1(config-if)#no shutdown 
+R1(config-if)#exit
+R1(config)#end
+R1#
+%SYS-5-CONFIG_I: Configured from console by console
+wr m
+Building configuration...
+[OK]
+```
+
+Так как не могу добавить второй маршрутизатор или другой внешний хост, то теоретически NAT настроен, но проверить нормально его не получается. Затыкаю второй интерфейс (у него нет физического порта в пакет трейсере).
+
+![alt text](image-13.png)
+
+```
+R1(config)#int g0/0/2
+R1(config-if)#sh
+R1(config-if)#shutdown 
+
+R1(config-if)#
+%LINK-5-CHANGED: Interface GigabitEthernet0/0/2, changed state to administratively down
+```
+
+ACL - не разрешаем обычным пользователям -влан 40 и 20 пинговать вип пользователей - 10 и 30. Также запрещаем обычным пользователям управление по SSH в влан99
+
+```
+R1(config)#ip ac
+R1(config)#ip access-list ex
+R1(config)#ip access-list extended BLOCK_VLAN40
+R1(config-ext-nacl)#rem
+R1(config-ext-nacl)#per
+R1(config-ext-nacl)#permit tcp
+R1(config-ext-nacl)#permit ip an
+R1(config-ext-nacl)#permit ip any an
+R1(config-ext-nacl)#permit ip any any 
+R1(config-ext-nacl)#de
+R1(config-ext-nacl)#den
+R1(config-ext-nacl)#deny ip 192.168.40.0 0.0.0.255 192.168.10.0 0.0.0.255
+R1(config-ext-nacl)#deny ip 192.168.20.0 0.0.0.255 192.168.10.0 0.0.0.255
+R1(config-ext-nacl)#deny ip 192.168.20.0 0.0.0.255 192.168.30.0 0.0.0.255
+R1(config-ext-nacl)#deny ip 192.168.40.0 0.0.0.255 192.168.30.0 0.0.0.255
+R1(config-ext-nacl)#e
+R1(config)# ip ac
+R1(config)# ip access-list e
+R1(config)# ip access-list extended BLOCK_VLAN40_20_SSH
+R1(config-ext-nacl)#d
+R1(config-ext-nacl)#pe
+R1(config-ext-nacl)#de
+R1(config-ext-nacl)#den
+R1(config-ext-nacl)#deny tc
+R1(config-ext-nacl)#deny tcp 192.168.20.0 0.0.0.255 192.168.99.0 0.0.0.31 eq 22
+R1(config-ext-nacl)#deny tcp 192.168.40.0 0.0.0.255 192.168.99.0 0.0.0.31 eq 22
+R1(config-ext-nacl)#pe
+R1(config-ext-nacl)#permit ip an
+R1(config-ext-nacl)#permit ip any an
+R1(config-ext-nacl)#permit ip any any 
+R1(config-ext-nacl)#e
+```
+
+Расписала первый лист в неправильном порядке, исправляю.
+
+```
+R1(config)#no ip access-list extended BLOCK_VLAN40
+R1(config)#
+R1(config)#ip access-list extended BLOCK_VLAN40_20
+R1(config-ext-nacl)#den
+R1(config-ext-nacl)#deny  ip 192.168.40.0 0.0.0.255 192.168.10.0 0.0.0.255
+R1(config-ext-nacl)#deny  ip 192.168.20.0 0.0.0.255 192.168.10.0 0.0.0.255
+R1(config-ext-nacl)#deny  ip 192.168.20.0 0.0.0.255 192.168.30.0 0.0.0.255
+R1(config-ext-nacl)#deny  ip 192.168.40.0 0.0.0.255 192.168.30.0 0.0.0.255
+R1(config-ext-nacl)#per
+R1(config-ext-nacl)#permit ip an
+R1(config-ext-nacl)#permit ip any an
+R1(config-ext-nacl)#permit ip any any 
+R1(config-ext-nacl)#e
+R1(config)#g0/0/0
+           ^
+% Invalid input detected at '^' marker.
+	
+R1(config)#int
+R1(config)#interface g0/0/0
+R1(config-if)#ip ac
+R1(config-if)#ip access-group BLOCK_VLAN40_20 in
+R1(config-if)#exit
+R1(config)#interface g0/0/1
+R1(config-if)#ip access-group BLOCK_VLAN40_20 in
+R1(config-if)#ip access-group BLOCK_VLAN40_20 in
+R1(config-if)#ip access-group BLOCK_VLAN40_20_SSH in
+R1(config-if)#e
+R1(config)#interface g0/0/0
+R1(config-if)#ip access-group BLOCK_VLAN40_20_SSH in
+R1(config-if)#end
+R1#
+%SYS-5-CONFIG_I: Configured from console by console
+wr m
+Building configuration...
+[OK]
+```
+
+Пинг с pc-f 
+```
+C:\>ping 192.168.10.11
+
+Pinging 192.168.10.11 with 32 bytes of data:
+
+Request timed out.
+Request timed out.
+Request timed out.
+Request timed out.
+
+Ping statistics for 192.168.10.11:
+    Packets: Sent = 4, Received = 0, Lost = 4 (100% loss),
+```
+
+```
+R1#show ip access-lists BLOCK_VLAN40_20
+Extended IP access list BLOCK_VLAN40_20
+    deny ip 192.168.40.0 0.0.0.255 192.168.10.0 0.0.0.255
+    deny ip 192.168.20.0 0.0.0.255 192.168.10.0 0.0.0.255
+    deny ip 192.168.20.0 0.0.0.255 192.168.30.0 0.0.0.255
+    deny ip 192.168.40.0 0.0.0.255 192.168.30.0 0.0.0.255
+    permit ip any any (12 match(es))
+```
+
+Списки настроены
+
+#### Шаг 9. Настройка CDP,LLDP и NTP
+
+```
+R1#show cdp 
+Global CDP information:
+    Sending CDP packets every 60 seconds
+    Sending a holdtime value of 180 seconds
+    Sending CDPv2 advertisements is enabled
+R1#
+R1#show cdp  n
+R1#show cdp  neighbors 
+Capability Codes: R - Router, T - Trans Bridge, B - Source Route Bridge
+                  S - Switch, H - Host, I - IGMP, r - Repeater, P - Phone
+Device ID    Local Intrfce   Holdtme    Capability   Platform    Port ID
+MS2          Gig 0/0/1        120                    3560        Gig 0/1
+MS1          Gig 0/0/0        120                    3560        Gig 0/1
+```
+
+```
+MS1#show cdp neighbors 
+Capability Codes: R - Router, T - Trans Bridge, B - Source Route Bridge
+                  S - Switch, H - Host, I - IGMP, r - Repeater, P - Phone
+Device ID    Local Intrfce   Holdtme    Capability   Platform    Port ID
+MS2          Gig 0/2          157                    3560        Gig 0/2
+S1           Por 1            157            S       2960        Fas 0/16
+S1           Por 1            157            S       2960        Fas 0/23
+S1           Por 1            157            S       2960        Por 1
+R1           Gig 0/1          179            R       ISR4300     Gig 0/0/0
+S2           Por 3            157            S       2960        Fas 0/19
+S2           Por 3            157            S       2960        Fas 0/24
+S2           Por 3            157            S       2960        Por 1
+```
+
+Прописываю всем устр-вам для безопасности:
+
+```
+MS1(config)#no cdp run
+```
+
+LLDP выключен на устройствах по умолчанию, включать не буду.
+
+```
+S1#
+%SYS-5-CONFIG_I: Configured from console by console
+show lldp neighbors 
+% LLDP is not enabled
+```
+
+```
+R1#clo
+R1#clock s
+R1#clock set 13:30:00 15 Oct 2026
+R1#conf t
+Enter configuration commands, one per line.  End with CNTL/Z.
+R1(config)#nt
+R1(config)#ntp m
+R1(config)#ntp master 4
+R1(config)#end
+```
+
+```
+MS1(config)#ntp server 192.168.0.1
+MS1(config)#end
+MS1#show run | include ntp
+ntp server 192.168.0.1
+```
+
+```
+MS2(config)#ntp server 192.168.0.1
+
+MS2(config)#end
+
+wr m
+Building configuration...
+[OK]
+```
+
+Для остальных коммутаторов
+```
+S1(config)#ntp
+S1(config)#ntp se
+S1(config)#ntp server 192.168.99.1
+S1(config)#end wrm
+               ^
+% Invalid input detected at '^' marker.
+	
+S1(config)#end 
+S1#
+%SYS-5-CONFIG_I: Configured from console by console
+wr m
+Building configuration...
+[OK]
+```
+
+Долго синхронизировалось, около 5 минут.
+
+```
+MS1#show clock 
+13:44:54.178 UTC Thu Oct 15 2026
+```
+
+```
+S1#show clock 
+13:46:10.548 UTC Thu Oct 15 2026
+```
 
 
 
